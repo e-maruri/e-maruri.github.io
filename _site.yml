@@ -1,9 +1,12 @@
 name: "my-website"
 output_dir: "."
 navbar:
-  title: "My Website"
+  title: "Emmanuel Maruri"
   left:
     - text: "Inicio"
+      icon: fa-home
       href: index.html
-    - text: "R mínimo para economistas"
-      href: Rbasicos.html
+    - text: "Códigos de R"
+      menu:
+      - text: "R mínimo para economistas"
+        href: Rbasicos.html

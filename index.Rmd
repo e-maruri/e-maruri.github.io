@@ -1,5 +1,19 @@
 ---
-title: "Emmanuel Maruri"
+title: "Acerca de"
+header:
+  - \usepackage{amsmath}
+  - \usepackage[spanish]{babel}
+  - \selectlanguage{spanish}
+---
+```{r, echo=FALSE}
+pacman::p_load(knitr)
+```
 ---
 
 ¡Hola mundo!
+
+Soy Emmanuel Maruri, estudiante de maestría en economía en [El Colegio de México](https://www.colmex.mx/). 
+
+[Twitter](https://twitter.com/maruri_ec)
+
+[CV](EMaruri_cv_en_mar_20.pdf){width=500px}
