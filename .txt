@@ -1,0 +1,8 @@
+Para juntar los archivos
+rmarkdown::render_site(encoding = "UTF-8")
+
+Para subir los archivos: 
+git add . 
+git add -A
+git commit -m "Comentario"
+git push origin master 

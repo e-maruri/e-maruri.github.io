@@ -11,7 +11,7 @@
 
 
 
-<title>Acerca de</title>
+<title>Econometría en R</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -289,12 +289,117 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Acerca de</h1>
+<h1 class="title toc-ignore">Econometría en R</h1>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#básicos">Básicos</a><ul>
+<li><a href="#limpiar-el-espacio-de-trabajo">Limpiar el espacio de trabajo</a></li>
+<li><a href="#vectores">Vectores</a></li>
+<li><a href="#matrices">Matrices</a><ul>
+<li><a href="#transpuesta">Transpuesta</a></li>
+<li><a href="#inversa">Inversa</a></li>
+<li><a href="#multiplicación">Multiplicación</a></li>
+<li><a href="#seleccionar-elementos-de-una-matriz">Seleccionar elementos de una matriz</a></li>
+<li><a href="#combinar-elementos-entre-matrices">Combinar elementos entre matrices</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#econometría">Econometría</a></li>
+</ul>
+</div>
 
-<p>More about this website.</p>
+<div id="básicos" class="section level1">
+<h1>Básicos</h1>
+<div id="limpiar-el-espacio-de-trabajo" class="section level2">
+<h2>Limpiar el espacio de trabajo</h2>
+<pre class="r"><code>rm(list=ls())  </code></pre>
+</div>
+<div id="vectores" class="section level2">
+<h2>Vectores</h2>
+<pre class="r"><code>(a &lt;- c(1,2,3,4,5,6))</code></pre>
+<pre><code>## [1] 1 2 3 4 5 6</code></pre>
+<pre class="r"><code>(b &lt;- c(1:9))</code></pre>
+<pre><code>## [1] 1 2 3 4 5 6 7 8 9</code></pre>
+</div>
+<div id="matrices" class="section level2">
+<h2>Matrices</h2>
+<p>Para crear matrices con los vectores <strong>a</strong> y <strong>b</strong>:</p>
+<pre class="r"><code>(A &lt;- matrix(a, ncol=2, byrow = TRUE))</code></pre>
+<pre><code>##      [,1] [,2]
+## [1,]    1    2
+## [2,]    3    4
+## [3,]    5    6</code></pre>
+<pre class="r"><code>(B &lt;- matrix(b, ncol=3, byrow = T))</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6
+## [3,]    7    8    9</code></pre>
+<p>Para ponerle nombre a las filas y columnas de la matriz <strong>A</strong></p>
+<pre class="r"><code>colnames(A) &lt;- c(&quot;X&quot;,&quot;Y&quot;)
+rownames(A) &lt;- c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;)
+A</code></pre>
+<pre><code>##   X Y
+## A 1 2
+## B 3 4
+## C 5 6</code></pre>
+<div id="transpuesta" class="section level3">
+<h3>Transpuesta</h3>
+<pre class="r"><code>t(A)</code></pre>
+<pre><code>##   A B C
+## X 1 3 5
+## Y 2 4 6</code></pre>
+</div>
+<div id="inversa" class="section level3">
+<h3>Inversa</h3>
+<pre class="r"><code>solve(B^2) #Elevamos B al cuadrado porque sino no era invertible</code></pre>
+<pre><code>##            [,1]       [,2]       [,3]
+## [1,]  1.2916667 -1.1666667  0.3750000
+## [2,] -2.1666667  1.6666667 -0.5000000
+## [3,]  0.9305556 -0.6111111  0.1805556</code></pre>
+</div>
+<div id="multiplicación" class="section level3">
+<h3>Multiplicación</h3>
+<p>Con el comando %*%.</p>
+<pre class="r"><code>B%*%A</code></pre>
+<pre><code>##       X   Y
+## [1,] 22  28
+## [2,] 49  64
+## [3,] 76 100</code></pre>
+</div>
+<div id="seleccionar-elementos-de-una-matriz" class="section level3">
+<h3>Seleccionar elementos de una matriz</h3>
+<p>Usando [,] justo después de la matriz, donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.</p>
+<pre class="r"><code>B[1,2]</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>B[1:2,]</code></pre>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6</code></pre>
+</div>
+<div id="combinar-elementos-entre-matrices" class="section level3">
+<h3>Combinar elementos entre matrices</h3>
+<p>Se usa el comando <em>cbind</em> para unir columnas, y <em>rbind</em> para unir filas. Nótese que los argumentos deben tener la misma cantidad de renglones en el caso de <em>cbind</em>, y la misma cantidad de columnas en el caso de <em>rbind</em>.</p>
+<pre class="r"><code>cbind(A,B)</code></pre>
+<pre><code>##   X Y      
+## A 1 2 1 2 3
+## B 3 4 4 5 6
+## C 5 6 7 8 9</code></pre>
+<pre class="r"><code>rbind(A,B[,1:2])</code></pre>
+<pre><code>##   X Y
+## A 1 2
+## B 3 4
+## C 5 6
+##   1 2
+##   4 5
+##   7 8</code></pre>
+</div>
+</div>
+</div>
+<div id="econometría" class="section level1">
+<h1>Econometría</h1>
+</div>
 
 
 

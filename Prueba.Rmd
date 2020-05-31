@@ -1,27 +1,58 @@
 ---
-title: "Prueba"
+title: "Econometría en R"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Básicos 
+## Limpiar el espacio de trabajo
+```{r}
+rm(list=ls())  
+```
+## Vectores
+```{r}
+(a <- c(1,2,3,4,5,6))
+(b <- c(1:9))
+```
+## Matrices 
+Para crear matrices con los vectores **a** y **b**: 
+```{r}
+(A <- matrix(a, ncol=2, byrow = TRUE))
+(B <- matrix(b, ncol=3, byrow = T))
+```
+Para ponerle nombre a las filas y columnas de la matriz **A**
+```{r}
+colnames(A) <- c("X","Y")
+rownames(A) <- c("A","B","C")
+A
+```
+### Transpuesta
+```{r}
+t(A)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+### Inversa
+```{r}
+solve(B^2) #Elevamos B al cuadrado porque sino no era invertible
+```
+### Multiplicación 
+Con el comando %*%.
+```{r}
+B%*%A
+```
+### Seleccionar elementos de una matriz
+Usando [,] justo después de la matriz, donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.
+```{r}
+B[1,2]
+B[1:2,]
+```
+### Combinar elementos entre matrices 
+Se usa el comando *cbind* para unir columnas, y *rbind* para unir filas. Nótese que los argumentos deben tener la misma cantidad de renglones en el caso de *cbind*, y la misma cantidad de columnas en el caso de *rbind*. 
+```{r}
+cbind(A,B)
+rbind(A,B[,1:2])
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Econometría 
