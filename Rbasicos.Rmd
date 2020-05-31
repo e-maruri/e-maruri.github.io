@@ -1,0 +1,110 @@
+---
+title: "R mínimo para economistas"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+header:
+  - \usepackage{amsmath}
+  - \usepackage[spanish]{babel}
+  - \selectlanguage{spanish}
+---
+\renewcommand{\tablename}{Tabla} 
+
+---
+```{r, echo=FALSE}
+pacman::p_load(tidyverse, 
+               stargazer,
+               knitr,
+               MASS)
+```
+# Básicos 
+## Limpiar el espacio de trabajo
+```{r}
+rm(list=ls())  
+```
+## Tipos de datos
+```{r}
+c('a','b','c')  # Caracter
+1:7             # Entero
+40<80           # Valor logico
+2+2 == 5        # Valor logico
+T == TRUE       # T expresion corta de verdadero
+x <- 24         # Asignación de valor 24 a la variable x para su uso posterior (OBJETO)
+x/2             # Uso posterior de variable u objeto x
+x               # Imprime en pantalla el valor de la variable u objeto
+sum (10,20,30)    # Función suma
+rep('R', times=3) # Repite la letra R el número de veces que se indica
+sqrt(9)           # Raíz cuadrada de 9
+```
+
+## Vectores
+```{r}
+(a <- c(1,2,3,4,5,6)) 
+(b <- c(1:9))
+y <- c('Primaria', 'Secundaria') # Vector caracteres
+1:5               # Secuencia 1-5
+seq(1, 10, 0.5)   # Secuencia con incrementos diferentes a 1
+y[2]              # Acceder al segundo valor del vector y
+(z <- c(0, y, 5))   # Concatena escalares y vectores
+```
+## Matrices 
+Para crear matrices con los vectores **a** y **b**: 
+```{r}
+(A <- matrix(a, ncol=2, byrow = TRUE))
+(B <- matrix(b, ncol=3, byrow = T))
+```
+Para ponerle nombre a las filas y columnas de la matriz **A**
+```{r}
+colnames(A) <- c("X","Y")
+rownames(A) <- c("A","B","C")
+A
+```
+### Transpuesta
+```{r}
+t(A)
+```
+
+### Inversa
+```{r}
+solve(B^2) #Elevamos B al cuadrado porque sino no era invertible
+```
+### Multiplicación 
+Con el comando %*%.
+```{r}
+B%*%A
+```
+### Seleccionar elementos de una matriz
+Usando [,] justo después de la matriz, donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.
+```{r}
+B[1,2]
+B[1:2,]
+```
+### Combinar elementos entre matrices 
+Se usa el comando *cbind* para unir columnas, y *rbind* para unir filas. Nótese que los argumentos deben tener la misma cantidad de renglones en el caso de *cbind*, y la misma cantidad de columnas en el caso de *rbind*. 
+```{r}
+cbind(A,B)
+rbind(A,B[,1:2])
+```
+
+# Econometría 
+Primero creamos una muestra aleatoria i.i.d:
+$$
+\begin{Bmatrix} \begin{pmatrix}  Y_i \\ X_{1i}\\ X_{2i} \end{pmatrix} \end{Bmatrix}_{i=1}^{400} \sim N_3 \begin{bmatrix} \begin{pmatrix}  1 \\ 0\\ 2 \end{pmatrix}, \begin{pmatrix}  0.8 & 0.4 & -0.2 \\ 0.4 & 1.0 & -0.8 \\ -0.2 & -0.8 & 2.0 \end{pmatrix}  \end{bmatrix}.
+$$ 
+```{r}
+#Para los parámetros
+mu <- c(1,0,2)
+sigma <- matrix(c(0.8, 0.4, -0.2, 0.4, 1, -0.8, -0.2, -0.8, 2), nrow = 3, byrow = T)
+#Para general la muestra 
+MA <- mvrnorm(400,mu,sigma) #mvrnorm de la libreria MASS
+Y <- MA[,1] 
+X <- cbind(rep(1,400),MA[,2:3])
+```
+
+Sabemos que el estimador de minimos cuadrados ordinarios es $\hat b_{MCO}=(X^{\prime}X)^{-1}X^{\prime}Y$, por lo que ahora podemos calcularlo fácilmente.
+
+```{r}
+(b_mco <- solve(t(X)%*%X)%*%t(X)%*%Y)
+```
+

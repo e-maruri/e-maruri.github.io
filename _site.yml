@@ -5,5 +5,5 @@ navbar:
   left:
     - text: "Inicio"
       href: index.html
-    - text: "Econometría en R"
-      href: Prueba.html
+    - text: "R mínimo para economistas"
+      href: Rbasicos.html
