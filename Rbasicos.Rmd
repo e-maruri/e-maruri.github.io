@@ -30,9 +30,7 @@ c('a','b','c')  # Caracter
 40<80           # Valor logico
 2+2 == 5        # Valor logico
 T == TRUE       # T expresion corta de verdadero
-x <- 24         # Asignación de valor 24 a la variable x para su uso posterior (OBJETO)
-x/2             # Uso posterior de variable u objeto x
-x               # Imprime en pantalla el valor de la variable u objeto
+h <- 24         # Asignar un valor a la variable h 
 sum (10,20,30)    # Función suma
 rep('R', times=3) # Repite la letra R el número de veces que se indica
 sqrt(9)           # Raíz cuadrada de 9
@@ -86,6 +84,25 @@ Se usa el comando *cbind* para unir columnas, y *rbind* para unir filas. Nótese
 cbind(A,B)
 rbind(A,B[,1:2])
 ```
+# Tablas
+Hay muchos paquetes para hacer tablas como *kable*, *kableExtra* y *stargazer*.
+
+## Kable
+Casi todo salio de [aquí](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html). Ahora un ejemplo con nuestra matriz **A**.
+```{r}
+kable(A, 
+      caption = "Primera matriz creada en forma de tabla",
+      digits = 0, #para ponerle la cantidad de números después del punto
+      col.names = c("$X_i$","$Y_i$")
+      )
+```
+
+En *kable* no se pueden cambiar los nombres a los renglones de una matriz, se tienen que poner previamente con el comando visto en la sección anterior. Además, para poner fórmulas o caracteres especiales se necesita una sintaxis específica, como se muestra a continuación. 
+```{r}
+rownames(B) <- c("$\\alpha$","$\\beta$","$\\gamma$")
+kable(B, col.names = c("$\\eta$","$\\delta$","$\\iota$"))
+```
+
 
 # Econometría 
 Primero creamos una muestra aleatoria i.i.d:
@@ -94,7 +111,7 @@ $$
 $$ 
 ```{r}
 #Para los parámetros
-mu <- c(1,0,2)
+mu <- c(100,0,2)
 sigma <- matrix(c(0.8, 0.4, -0.2, 0.4, 1, -0.8, -0.2, -0.8, 2), nrow = 3, byrow = T)
 #Para general la muestra 
 MA <- mvrnorm(400,mu,sigma) #mvrnorm de la libreria MASS
@@ -107,4 +124,42 @@ Sabemos que el estimador de minimos cuadrados ordinarios es $\hat b_{MCO}=(X^{\p
 ```{r}
 (b_mco <- solve(t(X)%*%X)%*%t(X)%*%Y)
 ```
+
+## Propiedades estadísticas de los estimadores
+### Insesgadez
+
+Generamos una muestra i.i.d $\begin{pmatrix} X_{1i} \\ X_{2i} \end{pmatrix}_{i=1}^{400} \sim N \begin{pmatrix} \begin{pmatrix} 13 \\ 8 \end{pmatrix}, \begin{pmatrix} 4 & 0 \\ 0 & 4.5 \end{pmatrix} \end{pmatrix}$ de variables aleatorias i.i.d.
+```{r}
+#Para plantar una "semilla" y se generen siempre los mismos números aleatorios
+set.seed(2020)
+#Para los parámetros de la muestra
+mu <- c(13,8)
+sigma <- matrix(c(4, 0, 0, 4.5), nrow = 2, byrow = T)
+MA <- mvrnorm(400,mu,sigma)
+```
+
+Ahora generamos una muestra i.i.d. $\{U_i\}_{i=1}^{400}$ de v.a.s i.i.d donde $U_i \sim N(0,1)$, $i=1,2,...,400$ tal que $U_i$ y $\mathbf{X}_i$ son independientes $\forall i \neq j$ , $i,j \in  \{1,2,...,400\}$.
+```{r}
+U <- rnorm(400,mean=0,sd=1)
+```
+
+Con estos datos generamos la muestra $\{Y_i\}_{i=1}^{400}$  donde $Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i$ , $i=1,2,...,400$.
+```{r}
+Y <- matrix(0, ncol=1, nrow=400)
+for(i in 1:400) {
+  Y[i,] <- 0.6 + 0.9*MA[i,1] + 0.6*MA[i,2] + U[i]
+}
+```
+
+Ahora calculamos el estimador $\hat{b}_{MCO}=\begin{pmatrix}  \hat \beta_{0} \\ \hat \beta_{1} \\ \hat \beta_{2} \end{pmatrix}$: 
+```{r}
+#Primero formamos una matriz con un vector de unos al inicio para la constante 
+X_1 <- cbind(rep(1,400),MA[,1],MA[,2])
+#Ahora sí estimamos b_mco
+b_mco <- solve(t(X_1)%*%X_1)%*%t(X_1)%*%Y
+#Para presentar los resultados
+rownames(b_mco) <- c("$\\beta_1$","$\\beta_2$","$\\beta_3$")
+kable(b_mco, caption = "Resultados", digits = 3)
+```
+
 
