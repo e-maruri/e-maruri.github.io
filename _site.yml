@@ -1,4 +1,4 @@
-name: "my-website"
+name: "Emmanuel Maruri"
 output_dir: "."
 navbar:
   title: "Emmanuel Maruri"
@@ -10,3 +10,6 @@ navbar:
       menu:
       - text: "R mínimo para economistas"
         href: Rbasicos.html
+      - text: "ENIGH 101"
+        href: ENIGH101.html
+        

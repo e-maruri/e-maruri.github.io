@@ -1,0 +1,27 @@
+---
+title: "ENIGH 101"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+header:
+  - \usepackage{amsmath}
+  - \usepackage[spanish]{babel}
+  - \selectlanguage{spanish}
+---
+\renewcommand{\tablename}{Tabla} 
+---
+```{r, echo=FALSE}
+pacman::p_load(tidyverse, 
+               stargazer,
+               knitr,
+               MASS)
+```
+
+# ¿Qué es y para qué sirve? 
+
+# ¿Cómo descargarla?
+Actualmente la puedes descargar entrando al sitio del [INEGI](https://www.inegi.org.mx/), y siguiendo la ruta Datos > Programas > Encuestas en hogares > Regulares > ENIGH > Nueva serie > Microdatos > concentradohogar. Ahí también encontrarás los resultados simplificados que publica el INEGI, además de los cuestionarios que realizan hay un útil [manual](https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh18_descriptor_archivos_fd_ns.pdf) que explica cada una de las variables que aparecen en la ENIGH (que se recomienda tener a la mano). 
+
+Aquí usaré la versión de 2018, la más reciente a la fecha, en formato csv, la cual he subido a mi sitio de github para mayor facilidad. 
+

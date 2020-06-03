@@ -22,6 +22,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -267,15 +269,31 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">My Website</a>
+      <a class="navbar-brand" href="index.html">Emmanuel Maruri</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Inicio</a>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Inicio
+  </a>
 </li>
-<li>
-  <a href="Rbasicos.html">R mínimo para economistas</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Códigos de R
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Rbasicos.html">R mínimo para economistas</a>
+    </li>
+    <li>
+      <a href="ENIGH101.html">ENIGH 101</a>
+    </li>
+  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -356,8 +374,8 @@ sum (10,20,30)    # Función suma</code></pre>
 1:5               # Secuencia 1-5</code></pre>
 <pre><code>## [1] 1 2 3 4 5</code></pre>
 <pre class="r"><code>seq(1, 10, 0.5)   # Secuencia con incrementos diferentes a 1</code></pre>
-<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0
-## [12]  6.5  7.0  7.5  8.0  8.5  9.0  9.5 10.0</code></pre>
+<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0  6.5
+## [13]  7.0  7.5  8.0  8.5  9.0  9.5 10.0</code></pre>
 <pre class="r"><code>y[2]              # Acceder al segundo valor del vector y</code></pre>
 <pre><code>## [1] &quot;Secundaria&quot;</code></pre>
 <pre class="r"><code>(z &lt;- c(0, y, 5))   # Concatena escalares y vectores</code></pre>
@@ -525,9 +543,9 @@ X &lt;- cbind(rep(1,400),MA[,2:3])</code></pre>
 <p>Sabemos que el estimador de minimos cuadrados ordinarios es <span class="math inline">\(\hat b_{MCO}=(X^{\prime}X)^{-1}X^{\prime}Y\)</span>, por lo que ahora podemos calcularlo fácilmente.</p>
 <pre class="r"><code>(b_mco &lt;- solve(t(X)%*%X)%*%t(X)%*%Y)</code></pre>
 <pre><code>##             [,1]
-## [1,] 99.90753493
-## [2,]  0.45530669
-## [3,]  0.06040427</code></pre>
+## [1,] 99.78060207
+## [2,]  0.44213835
+## [3,]  0.09440048</code></pre>
 <div id="propiedades-estadísticas-de-los-estimadores" class="section level2">
 <h2>Propiedades estadísticas de los estimadores</h2>
 <div id="insesgadez" class="section level3">

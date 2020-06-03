@@ -162,4 +162,3 @@ rownames(b_mco) <- c("$\\beta_1$","$\\beta_2$","$\\beta_3$")
 kable(b_mco, caption = "Resultados", digits = 3)
 ```
 
-
