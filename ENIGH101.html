@@ -22,6 +22,7 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -316,6 +317,10 @@ $(document).ready(function () {
 <li><a href="#section"></a></li>
 <li><a href="#qué-es-y-para-qué-sirve">¿Qué es y para qué sirve?</a></li>
 <li><a href="#cómo-descargarla">¿Cómo descargarla?</a></li>
+<li><a href="#resultados-básicos">Resultados básicos</a><ul>
+<li><a href="#deciles-de-ingreso">Deciles de ingreso</a></li>
+<li><a href="#percentiles-de-ingreso">Percentiles de ingreso</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -329,6 +334,283 @@ $(document).ready(function () {
 <h1>¿Cómo descargarla?</h1>
 <p>Actualmente la puedes descargar entrando al sitio del <a href="https://www.inegi.org.mx/">INEGI</a>, y siguiendo la ruta Datos &gt; Programas &gt; Encuestas en hogares &gt; Regulares &gt; ENIGH &gt; Nueva serie &gt; Microdatos &gt; concentradohogar. Ahí también encontrarás los resultados simplificados que publica el INEGI, además de los cuestionarios que realizan hay un útil <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh18_descriptor_archivos_fd_ns.pdf">manual</a> que explica cada una de las variables que aparecen en la ENIGH (que se recomienda tener a la mano).</p>
 <p>Aquí usaré la versión de 2018, la más reciente a la fecha, en formato csv, la cual he subido a mi sitio de github para mayor facilidad.</p>
+<pre class="r"><code>ENIGH &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv&quot;)
+
+# Para quedaronos sólo con las que utilizaremos 
+#ENIGH1 &lt;- subset.data.frame(ENIGH, select = c(&quot;ï..folioviv&quot;, &quot;foliohog&quot;, &quot;ing_cor&quot;, &quot;ingtrab&quot;, &quot;trabajo&quot;, &quot;negocio&quot;, &quot;otros_trab&quot;, &quot;rentas&quot;, &quot;utilidad&quot;, &quot;arrenda&quot;, &quot;transfer&quot;, &quot;jubilacion&quot;, &quot;becas&quot;, &quot;donativos&quot;, &quot;remesas&quot;, &quot;bene_gob&quot;, &quot;transf_hog&quot;, &quot;trans_inst&quot;, &quot;estim_alqu&quot;, &quot;otros_ing&quot;,&quot;factor&quot;,&quot;upm&quot;,&quot;est_dis&quot;))</code></pre>
+</div>
+<div id="resultados-básicos" class="section level1">
+<h1>Resultados básicos</h1>
+<p>Uno de los elementos más importantes de la ENIGH es el factor de espansión, llamado <em>factor</em> en la base de datos, pues cada observación representa a otras viviendas y personas de condiciones socioeconómicas similares, por lo que el factor de expansión constituye el peso que se le da a cada unidad muestral para generalizar los resultados de la muestra a la población.</p>
+<p>Veamos un ejemplo de su importancia. La siguiente tablita muestra que la suma de la columna factor representa el número total de hogares, que al multiplicar cada una por el número total de integrantes de cada hogar nos da la población total. Se observa que cuando no consideramos el factor de expansión el ingreso corriente promedio trimestral es de poco más de 46 mil pesos, pero cuando sí consideramos el factor es 49.6 mil pesos, que es justo el que reporta el INEGI (como puede verse <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh2018_ns_presentacion_resultados.pdf">aquí</a>)).</p>
+<pre class="r"><code>a &lt;- sum(ENIGH$factor)
+b &lt;- sum(ENIGH$factor*ENIGH$tot_integ)
+c &lt;- mean(ENIGH$ing_cor)
+d &lt;- weighted.mean(ENIGH$ing_cor, ENIGH$factor)
+A &lt;- matrix(c(a,b,c,d), nrow = 1)
+kable(A, col.names = c(&quot;Hogares&quot;, &quot;Habitantes&quot;, &quot;Ingreso corriente s.f.&quot;, &quot;Ingreso corriente c.f.&quot;), 
+      caption = &quot;Primer resumen ENIGH&quot;, format.args = list(big.mark = &quot;,&quot;), label = &quot;t1&quot;) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table>
+<caption>
+Primer resumen ENIGH
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Hogares
+</th>
+<th style="text-align:right;">
+Habitantes
+</th>
+<th style="text-align:right;">
+Ingreso corriente s.f.
+</th>
+<th style="text-align:right;">
+Ingreso corriente c.f.
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+34,744,818
+</td>
+<td style="text-align:right;">
+125,091,790
+</td>
+<td style="text-align:right;">
+46,043.88
+</td>
+<td style="text-align:right;">
+49,610.29
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+<div id="deciles-de-ingreso" class="section level2">
+<h2>Deciles de ingreso</h2>
+<p>Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso.</p>
+<pre class="r"><code>deciles &lt;- seq(0.1, 1, 0.1)
+#Deciles sin factor
+deciles_ingreso &lt;- quantile(ENIGH$ing_cor, deciles)
+
+#Deciles con factor
+#utilizamos la función &quot;wtd.quantile&quot; de la libreria &quot;reldist&quot;
+deciles_ingreso2 &lt;- wtd.quantile(ENIGH$ing_cor, deciles, weight = ENIGH$factor)
+
+#Comparación 
+#kable(list(deciles_ingreso, deciles_ingreso2))
+
+#Deciles sin factor
+ENIGH1 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
+  ing_cor &lt;= deciles_ingreso[1] ~ &quot;I&quot;, 
+  ing_cor &lt;= deciles_ingreso[2] ~ &quot;II&quot;,
+  ing_cor &lt;= deciles_ingreso[3] ~ &quot;III&quot;,
+  ing_cor &lt;= deciles_ingreso[4] ~ &quot;IV&quot;,
+  ing_cor &lt;= deciles_ingreso[5] ~ &quot;V&quot;,
+  ing_cor &lt;= deciles_ingreso[6] ~ &quot;VI&quot;,
+  ing_cor &lt;= deciles_ingreso[7] ~ &quot;VII&quot;,
+  ing_cor &lt;= deciles_ingreso[8] ~ &quot;VIII&quot;,
+  ing_cor &lt;= deciles_ingreso[9] ~ &quot;IX&quot;,
+  TRUE ~ &quot;X&quot;
+)
+)
+B &lt;- ENIGH1 %&gt;% group_by(Decil) %&gt;% summarize(weighted.mean(ing_cor, factor)) 
+colnames(B) &lt;- c(&quot;Decil&quot;, &quot;Ing_prom&quot;)
+B &lt;- as.data.frame(B)
+
+#Deciles con factor
+ENIGH2 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
+  ing_cor &lt;= deciles_ingreso2[1] ~ &quot;I&quot;, 
+  ing_cor &lt;= deciles_ingreso2[2] ~ &quot;II&quot;,
+  ing_cor &lt;= deciles_ingreso2[3] ~ &quot;III&quot;,
+  ing_cor &lt;= deciles_ingreso2[4] ~ &quot;IV&quot;,
+  ing_cor &lt;= deciles_ingreso2[5] ~ &quot;V&quot;,
+  ing_cor &lt;= deciles_ingreso2[6] ~ &quot;VI&quot;,
+  ing_cor &lt;= deciles_ingreso2[7] ~ &quot;VII&quot;,
+  ing_cor &lt;= deciles_ingreso2[8] ~ &quot;VIII&quot;,
+  ing_cor &lt;= deciles_ingreso2[9] ~ &quot;IX&quot;,
+  TRUE ~ &quot;X&quot;
+)
+)
+
+C &lt;- ENIGH2 %&gt;% group_by(Decil) %&gt;% summarize(weighted.mean(ing_cor, factor)) 
+colnames(C) &lt;- c(&quot;Decil&quot;, &quot;Ing_prom&quot;)
+C &lt;- as.data.frame(C)
+
+D &lt;- cbind(arrange(B, Ing_prom),arrange(C,Ing_prom)[,2])
+
+kable(D, col.names = c(&quot;Decil&quot;, &quot;Ingreso promedio s.f.&quot;, &quot;Ingreso promedio c.f.&quot;), 
+      caption = &quot;Deciles de ingreso&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table>
+<caption>
+Deciles de ingreso
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Decil
+</th>
+<th style="text-align:right;">
+Ingreso promedio s.f.
+</th>
+<th style="text-align:right;">
+Ingreso promedio c.f.
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+I
+</td>
+<td style="text-align:right;">
+8,713
+</td>
+<td style="text-align:right;">
+9,114
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+II
+</td>
+<td style="text-align:right;">
+15,290
+</td>
+<td style="text-align:right;">
+16,100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:right;">
+20,324
+</td>
+<td style="text-align:right;">
+21,429
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:right;">
+25,314
+</td>
+<td style="text-align:right;">
+26,697
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+V
+</td>
+<td style="text-align:right;">
+30,616
+</td>
+<td style="text-align:right;">
+32,318
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VI
+</td>
+<td style="text-align:right;">
+36,961
+</td>
+<td style="text-align:right;">
+38,959
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VII
+</td>
+<td style="text-align:right;">
+44,727
+</td>
+<td style="text-align:right;">
+47,268
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VIII
+</td>
+<td style="text-align:right;">
+55,584
+</td>
+<td style="text-align:right;">
+58,888
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IX
+</td>
+<td style="text-align:right;">
+73,630
+</td>
+<td style="text-align:right;">
+78,596
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X
+</td>
+<td style="text-align:right;">
+156,133
+</td>
+<td style="text-align:right;">
+166,763
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div id="percentiles-de-ingreso" class="section level2">
+<h2>Percentiles de ingreso</h2>
+<p>Ahora lo mismo pero con percentiles, es decir, cada 1%.</p>
+<pre class="r"><code>percentiles &lt;- seq(0.01, 1, 0.01)
+# Percentiles con factor
+percentiles_ingreso &lt;- wtd.quantile(ENIGH$ing_cor, percentiles, weight = ENIGH$factor)
+
+ENIGH3 &lt;- subset.data.frame(ENIGH, select = c(&quot;factor&quot;, &quot;ing_cor&quot;))
+ENIGH3 &lt;- ENIGH3 %&gt;% mutate(Percentil = &quot;&quot;)
+
+# Percentiles con factor</code></pre>
+</div>
 </div>
 
 
