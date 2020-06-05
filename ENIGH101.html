@@ -332,8 +332,8 @@ $(document).ready(function () {
 </div>
 <div id="cómo-descargarla" class="section level1">
 <h1>¿Cómo descargarla?</h1>
-<p>Actualmente la puedes descargar entrando al sitio del <a href="https://www.inegi.org.mx/">INEGI</a>, y siguiendo la ruta Datos &gt; Programas &gt; Encuestas en hogares &gt; Regulares &gt; ENIGH &gt; Nueva serie &gt; Microdatos &gt; concentradohogar. Ahí también encontrarás los resultados simplificados que publica el INEGI, además de los cuestionarios que realizan hay un útil <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh18_descriptor_archivos_fd_ns.pdf">manual</a> que explica cada una de las variables que aparecen en la ENIGH (que se recomienda tener a la mano).</p>
-<p>Aquí usaré la versión de 2018, la más reciente a la fecha, en formato csv, la cual he subido a mi sitio de github para mayor facilidad.</p>
+<p>Actualmente la puedes descargar entrando al sitio del <a href="https://www.inegi.org.mx/">INEGI</a>, y siguiendo la ruta Datos &gt; Programas &gt; Encuestas en hogares &gt; Regulares &gt; ENIGH &gt; Nueva serie &gt; Microdatos &gt; concentradohogar. Ahí también encontrarás los resultados simplificados que publica el INEGI y, además de los cuestionarios que realizan, hay un útil <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh18_descriptor_archivos_fd_ns.pdf">manual</a> que explica cada una de las variables que aparecen en la ENIGH (que te recomiendo tener siempre a la mano).</p>
+<p>Aquí usaré la versión de 2018 en formato .csv, la más reciente a la fecha, la cual he subido a mi sitio de github para que sea más fácil replicar todo.</p>
 <pre class="r"><code>ENIGH &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv&quot;)
 
 # Para quedaronos sólo con las que utilizaremos 
@@ -341,15 +341,16 @@ $(document).ready(function () {
 </div>
 <div id="resultados-básicos" class="section level1">
 <h1>Resultados básicos</h1>
-<p>Uno de los elementos más importantes de la ENIGH es el factor de espansión, llamado <em>factor</em> en la base de datos, pues cada observación representa a otras viviendas y personas de condiciones socioeconómicas similares, por lo que el factor de expansión constituye el peso que se le da a cada unidad muestral para generalizar los resultados de la muestra a la población.</p>
-<p>Veamos un ejemplo de su importancia. La siguiente tablita muestra que la suma de la columna factor representa el número total de hogares, que al multiplicar cada una por el número total de integrantes de cada hogar nos da la población total. Se observa que cuando no consideramos el factor de expansión el ingreso corriente promedio trimestral es de poco más de 46 mil pesos, pero cuando sí consideramos el factor es 49.6 mil pesos, que es justo el que reporta el INEGI (como puede verse <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh2018_ns_presentacion_resultados.pdf">aquí</a>)).</p>
+<p>Uno de los elementos más importantes de la ENIGH es el factor de expansión, llamado <em>factor</em> en la base de datos, pues cada observación representa a otras viviendas y personas de condiciones socioeconómicas similares, por lo que el factor de expansión constituye el peso que se le da a cada unidad muestral para generalizar los resultados de la muestra a la población.</p>
+<p>Veamos un ejemplo de su importancia. La siguiente tablita muestra que la suma de la columna factor representa el número total de hogares, que al multiplicar cada una por el número total de integrantes de cada hogar nos da la población total. Se observa que cuando no consideramos el factor de expansión el ingreso corriente promedio trimestral es de poco más de 46 mil pesos, pero cuando sí consideramos el factor es 49.6 mil pesos, que es justo el que reporta el INEGI (como puede verse <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh2018_ns_presentacion_resultados.pdf">aquí</a>).</p>
 <pre class="r"><code>a &lt;- sum(ENIGH$factor)
 b &lt;- sum(ENIGH$factor*ENIGH$tot_integ)
 c &lt;- mean(ENIGH$ing_cor)
 d &lt;- weighted.mean(ENIGH$ing_cor, ENIGH$factor)
-A &lt;- matrix(c(a,b,c,d), nrow = 1)
-kable(A, col.names = c(&quot;Hogares&quot;, &quot;Habitantes&quot;, &quot;Ingreso corriente s.f.&quot;, &quot;Ingreso corriente c.f.&quot;), 
-      caption = &quot;Primer resumen ENIGH&quot;, format.args = list(big.mark = &quot;,&quot;), label = &quot;t1&quot;) %&gt;%
+A &lt;- data.frame(matrix(c(a,b,c,d), ncol = 1))
+row.names(A) &lt;- c(&quot;Hogares&quot;, &quot;Habitantes&quot;, &quot;Ingreso corriente s.f.&quot;, &quot;Ingreso corriente c.f.&quot;)
+kable(A, col.names = c(&quot;Cantidad&quot;), 
+      caption = &quot;Primer resumen ENIGH&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
   footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
 <table>
 <caption>
@@ -357,33 +358,44 @@ Primer resumen ENIGH
 </caption>
 <thead>
 <tr>
-<th style="text-align:right;">
-Hogares
+<th style="text-align:left;">
 </th>
 <th style="text-align:right;">
-Habitantes
-</th>
-<th style="text-align:right;">
-Ingreso corriente s.f.
-</th>
-<th style="text-align:right;">
-Ingreso corriente c.f.
+Cantidad
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align:left;">
+Hogares
+</td>
 <td style="text-align:right;">
 34,744,818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Habitantes
 </td>
 <td style="text-align:right;">
 125,091,790
 </td>
-<td style="text-align:right;">
-46,043.88
+</tr>
+<tr>
+<td style="text-align:left;">
+Ingreso corriente s.f.
 </td>
 <td style="text-align:right;">
-49,610.29
+46,044
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ingreso corriente c.f.
+</td>
+<td style="text-align:right;">
+49,610
 </td>
 </tr>
 </tbody>

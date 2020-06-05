@@ -16,6 +16,7 @@ header:
 pacman::p_load(tidyverse, 
                stargazer,
                knitr,
+               zoo, 
                MASS)
 ```
 # Básicos 
@@ -84,6 +85,51 @@ Se usa el comando *cbind* para unir columnas, y *rbind* para unir filas. Nótese
 cbind(A,B)
 rbind(A,B[,1:2])
 ```
+# Importar bases de datos
+## INEGI - BIE
+Una de las fuentes más comunes para descargar datos en México es el Banco de Información Económica ([BIE](https://www.inegi.org.mx/sistemas/bie/)) del INEGI. Básicamente todos los tipos de archivos de datos se leen de la misma forma, con ligeras variantes entre unos y otros, así que si dominas una forma será fácil leer otros tipos de archivos. 
+
+Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo cual no es útil para procesar los datos. 
+
+Utilizamos la función *read.csv* para leer el archivo, el primer argumento contiene la ruta del archivo, usamos la opción *skip* para saltarnos las primeras dos filas del archivo, lo que combinamos con la opción *header = FALSE* para indicar que la primera fila del archivo no contiene los nombres de las variables, los cuales hemos determinado nosotros con la opción *col.names*. También hay que tener en cuenta que las bases descargadas del BIE suelen tener notas al final de los datos, si no las consideramos la base no se cargará de manera adecuada, lo cual podemos solucionar simplemente indicando el número máximo de renglones que queremos que lea, en este caso nuestro último renglón con datos es el 182, menos dos que quitamos al inicio, 180, lo cual indicamos con la opción *nrows*.
+
+```{r}
+#choose.files()
+rutaCP <- "C:\\Users\\marur\\Desktop\\BIE_BIE20200604182657.csv"
+baseCP <- read.csv(rutaCP, 
+                    header = F,
+                    skip = 2, 
+                    nrows = 180,
+                    col.names = c("Periodo", "Desempleo", "Inflacion", "Indice_inf"))
+# La función str nos dice la estructura de las variables en nuestro data frame
+str(baseCP)
+```
+
+Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria *zoo* (que tienes que instalar previamente), en especial la función *as.yearmon*. 
+
+```{r}
+#### Convertir columna de fecha en meses a formato fecha
+baseCP$Periodo <- as.yearmon(baseCP$Periodo, format="%Y/%m")
+baseCP$Periodo <- as.Date(baseCP$Periodo)
+str(baseCP)
+```
+
+## Agregación de datos
+
+```{r}
+des_men <- ts(baseCP$Desempleo, start = 2005, frequency = 12)
+des_trim <- aggregate(des_men, nfrequency = 4, mean)
+des_anual <- aggregate(des_men, nfrequency = 1, mean)
+```
+
+## Tasas de crecimiento 
+```{r}
+baseCP <- baseCP %>% mutate(inf_anual = ((Indice_inf/lag(Indice_inf, n=12))-1)*100, 
+                  inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100 )
+head(baseCP, n=20)
+```
+
+
 # Tablas
 Hay muchos paquetes para hacer tablas como *kable*, *kableExtra* y *stargazer*.
 

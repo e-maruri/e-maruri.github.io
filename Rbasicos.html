@@ -325,6 +325,11 @@ $(document).ready(function () {
 <li><a href="#combinar-elementos-entre-matrices">Combinar elementos entre matrices</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#importar-bases-de-datos">Importar bases de datos</a><ul>
+<li><a href="#inegi---bie">INEGI - BIE</a></li>
+<li><a href="#agregación-de-datos">Agregación de datos</a></li>
+<li><a href="#tasas-de-crecimiento">Tasas de crecimiento</a></li>
+</ul></li>
 <li><a href="#tablas">Tablas</a><ul>
 <li><a href="#kable">Kable</a></li>
 </ul></li>
@@ -455,6 +460,93 @@ A</code></pre>
 </div>
 </div>
 </div>
+<div id="importar-bases-de-datos" class="section level1">
+<h1>Importar bases de datos</h1>
+<div id="inegi---bie" class="section level2">
+<h2>INEGI - BIE</h2>
+<p>Una de las fuentes más comunes para descargar datos en México es el Banco de Información Económica (<a href="https://www.inegi.org.mx/sistemas/bie/">BIE</a>) del INEGI. Básicamente todos los tipos de archivos de datos se leen de la misma forma, con ligeras variantes entre unos y otros, así que si dominas una forma será fácil leer otros tipos de archivos.</p>
+<p>Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo cual no es útil para procesar los datos.</p>
+<p>Utilizamos la función <em>read.csv</em> para leer el archivo, el primer argumento contiene la ruta del archivo, usamos la opción <em>skip</em> para saltarnos las primeras dos filas del archivo, lo que combinamos con la opción <em>header = FALSE</em> para indicar que la primera fila del archivo no contiene los nombres de las variables, los cuales hemos determinado nosotros con la opción <em>col.names</em>. También hay que tener en cuenta que las bases descargadas del BIE suelen tener notas al final de los datos, si no las consideramos la base no se cargará de manera adecuada, lo cual podemos solucionar simplemente indicando el número máximo de renglones que queremos que lea, en este caso nuestro último renglón con datos es el 182, menos dos que quitamos al inicio, 180, lo cual indicamos con la opción <em>nrows</em>.</p>
+<pre class="r"><code>#choose.files()
+rutaCP &lt;- &quot;C:\\Users\\marur\\Desktop\\BIE_BIE20200604182657.csv&quot;
+baseCP &lt;- read.csv(rutaCP, 
+                    header = F,
+                    skip = 2, 
+                    nrows = 180,
+                    col.names = c(&quot;Periodo&quot;, &quot;Desempleo&quot;, &quot;Inflacion&quot;, &quot;Indice_inf&quot;))
+# La función str nos dice la estructura de las variables en nuestro data frame
+str(baseCP)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    180 obs. of  4 variables:
+##  $ Periodo   : Factor w/ 180 levels &quot;2005/01&quot;,&quot;2005/02&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ Desempleo : num  3.64 3.55 3.63 3.57 3.68 ...
+##  $ Inflacion : num  4.54 4.27 4.39 4.6 4.6 4.33 4.47 3.95 3.51 3.05 ...
+##  $ Indice_inf: num  58.3 58.5 58.8 59 58.8 ...</code></pre>
+<p>Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria <em>zoo</em> (que tienes que instalar previamente), en especial la función <em>as.yearmon</em>.</p>
+<pre class="r"><code>#### Convertir columna de fecha en meses a formato fecha
+baseCP$Periodo &lt;- as.yearmon(baseCP$Periodo, format=&quot;%Y/%m&quot;)
+baseCP$Periodo &lt;- as.Date(baseCP$Periodo)
+str(baseCP)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    180 obs. of  4 variables:
+##  $ Periodo   : Date, format: &quot;2005-01-01&quot; ...
+##  $ Desempleo : num  3.64 3.55 3.63 3.57 3.68 ...
+##  $ Inflacion : num  4.54 4.27 4.39 4.6 4.6 4.33 4.47 3.95 3.51 3.05 ...
+##  $ Indice_inf: num  58.3 58.5 58.8 59 58.8 ...</code></pre>
+</div>
+<div id="agregación-de-datos" class="section level2">
+<h2>Agregación de datos</h2>
+<pre class="r"><code>des_men &lt;- ts(baseCP$Desempleo, start = 2005, frequency = 12)
+des_trim &lt;- aggregate(des_men, nfrequency = 4, mean)
+des_anual &lt;- aggregate(des_men, nfrequency = 1, mean)</code></pre>
+</div>
+<div id="tasas-de-crecimiento" class="section level2">
+<h2>Tasas de crecimiento</h2>
+<pre class="r"><code>baseCP &lt;- baseCP %&gt;% mutate(inf_anual = ((Indice_inf/lag(Indice_inf, n=12))-1)*100, 
+                  inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100 )
+head(baseCP, n=20)</code></pre>
+<pre><code>##       Periodo Desempleo Inflacion Indice_inf inf_anual
+## 1  2005-01-01  3.636742      4.54   58.30916        NA
+## 2  2005-02-01  3.551422      4.27   58.50343        NA
+## 3  2005-03-01  3.632590      4.39   58.76712        NA
+## 4  2005-04-01  3.566550      4.60   58.97642        NA
+## 5  2005-05-01  3.677900      4.60   58.82825        NA
+## 6  2005-06-01  3.743541      4.33   58.77178        NA
+## 7  2005-07-01  3.575242      4.47   59.00180        NA
+## 8  2005-08-01  3.434784      3.95   59.07226        NA
+## 9  2005-09-01  3.340340      3.51   59.30901        NA
+## 10 2005-10-01  3.260725      3.05   59.45458        NA
+## 11 2005-11-01  3.147273      2.91   59.88249        NA
+## 12 2005-12-01  3.173325      3.33   60.25031        NA
+## 13 2006-01-01  3.202318      3.94   60.60363  3.935000
+## 14 2006-02-01  3.521815      3.75   60.69636  3.748373
+## 15 2006-03-01  3.335982      3.41   60.77251  3.412437
+## 16 2006-04-01  3.382306      3.20   60.86162  3.196536
+## 17 2006-05-01  3.146361      3.00   60.59067  2.995879
+## 18 2006-06-01  3.506301      3.18   60.64300  3.183866
+## 19 2006-07-01  3.665275      3.06   60.80929  3.063455
+## 20 2006-08-01  3.616751      3.47   61.11961  3.465846
+##    inf_mensual
+## 1           NA
+## 2   0.33317341
+## 3   0.45072568
+## 4   0.35614168
+## 5  -0.25122538
+## 6  -0.09598788
+## 7   0.39137218
+## 8   0.11941242
+## 9   0.40078227
+## 10  0.24544915
+## 11  0.71973163
+## 12  0.61423467
+## 13  0.58640940
+## 14  0.15301369
+## 15  0.12546730
+## 16  0.14662132
+## 17 -0.44517837
+## 18  0.08635579
+## 19  0.27422069
+## 20  0.51030840</code></pre>
+</div>
+</div>
 <div id="tablas" class="section level1">
 <h1>Tablas</h1>
 <p>Hay muchos paquetes para hacer tablas como <em>kable</em>, <em>kableExtra</em> y <em>stargazer</em>.</p>
@@ -467,29 +559,54 @@ A</code></pre>
       col.names = c(&quot;$X_i$&quot;,&quot;$Y_i$&quot;)
       )</code></pre>
 <table>
-<caption>Primera matriz creada en forma de tabla</caption>
+<caption>
+Primera matriz creada en forma de tabla
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="right"><span class="math inline">\(X_i\)</span></th>
-<th align="right"><span class="math inline">\(Y_i\)</span></th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(X_i\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(Y_i\)</span>
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>A</td>
-<td align="right">1</td>
-<td align="right">2</td>
+<tr>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
 </tr>
-<tr class="even">
-<td>B</td>
-<td align="right">3</td>
-<td align="right">4</td>
+<tr>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
 </tr>
-<tr class="odd">
-<td>C</td>
-<td align="right">5</td>
-<td align="right">6</td>
+<tr>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+6
+</td>
 </tr>
 </tbody>
 </table>
@@ -498,31 +615,62 @@ A</code></pre>
 kable(B, col.names = c(&quot;$\\eta$&quot;,&quot;$\\delta$&quot;,&quot;$\\iota$&quot;))</code></pre>
 <table>
 <thead>
-<tr class="header">
-<th></th>
-<th align="right"><span class="math inline">\(\eta\)</span></th>
-<th align="right"><span class="math inline">\(\delta\)</span></th>
-<th align="right"><span class="math inline">\(\iota\)</span></th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\eta\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\delta\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\iota\)</span>
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td><span class="math inline">\(\alpha\)</span></td>
-<td align="right">1</td>
-<td align="right">2</td>
-<td align="right">3</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\alpha\)</span>
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
 </tr>
-<tr class="even">
-<td><span class="math inline">\(\beta\)</span></td>
-<td align="right">4</td>
-<td align="right">5</td>
-<td align="right">6</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\beta\)</span>
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+6
+</td>
 </tr>
-<tr class="odd">
-<td><span class="math inline">\(\gamma\)</span></td>
-<td align="right">7</td>
-<td align="right">8</td>
-<td align="right">9</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\gamma\)</span>
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+9
+</td>
 </tr>
 </tbody>
 </table>
@@ -542,10 +690,10 @@ Y &lt;- MA[,1]
 X &lt;- cbind(rep(1,400),MA[,2:3])</code></pre>
 <p>Sabemos que el estimador de minimos cuadrados ordinarios es <span class="math inline">\(\hat b_{MCO}=(X^{\prime}X)^{-1}X^{\prime}Y\)</span>, por lo que ahora podemos calcularlo fácilmente.</p>
 <pre class="r"><code>(b_mco &lt;- solve(t(X)%*%X)%*%t(X)%*%Y)</code></pre>
-<pre><code>##             [,1]
-## [1,] 99.78060207
-## [2,]  0.44213835
-## [3,]  0.09440048</code></pre>
+<pre><code>##            [,1]
+## [1,] 99.7057781
+## [2,]  0.4935216
+## [3,]  0.1363669</code></pre>
 <div id="propiedades-estadísticas-de-los-estimadores" class="section level2">
 <h2>Propiedades estadísticas de los estimadores</h2>
 <div id="insesgadez" class="section level3">
@@ -573,19 +721,33 @@ b_mco &lt;- solve(t(X_1)%*%X_1)%*%t(X_1)%*%Y
 rownames(b_mco) &lt;- c(&quot;$\\beta_1$&quot;,&quot;$\\beta_2$&quot;,&quot;$\\beta_3$&quot;)
 kable(b_mco, caption = &quot;Resultados&quot;, digits = 3)</code></pre>
 <table>
-<caption>Resultados</caption>
+<caption>
+Resultados
+</caption>
 <tbody>
-<tr class="odd">
-<td align="left"><span class="math inline">\(\beta_1\)</span></td>
-<td align="right">0.745</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\beta_1\)</span>
+</td>
+<td style="text-align:right;">
+0.745
+</td>
 </tr>
-<tr class="even">
-<td align="left"><span class="math inline">\(\beta_2\)</span></td>
-<td align="right">0.909</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\beta_2\)</span>
+</td>
+<td style="text-align:right;">
+0.909
+</td>
 </tr>
-<tr class="odd">
-<td align="left"><span class="math inline">\(\beta_3\)</span></td>
-<td align="right">0.567</td>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\beta_3\)</span>
+</td>
+<td style="text-align:right;">
+0.567
+</td>
 </tr>
 </tbody>
 </table>
