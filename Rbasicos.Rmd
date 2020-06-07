@@ -9,14 +9,13 @@ header:
   - \usepackage[spanish]{babel}
   - \selectlanguage{spanish}
 ---
-\renewcommand{\tablename}{Tabla} 
 
----
 ```{r, echo=FALSE}
 pacman::p_load(tidyverse, 
+               lubridate, 
                stargazer,
                knitr,
-               zoo, 
+               kableExtra,
                MASS)
 ```
 # Básicos 
@@ -94,9 +93,7 @@ Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo
 Utilizamos la función *read.csv* para leer el archivo, el primer argumento contiene la ruta del archivo, usamos la opción *skip* para saltarnos las primeras dos filas del archivo, lo que combinamos con la opción *header = FALSE* para indicar que la primera fila del archivo no contiene los nombres de las variables, los cuales hemos determinado nosotros con la opción *col.names*. También hay que tener en cuenta que las bases descargadas del BIE suelen tener notas al final de los datos, si no las consideramos la base no se cargará de manera adecuada, lo cual podemos solucionar simplemente indicando el número máximo de renglones que queremos que lea, en este caso nuestro último renglón con datos es el 182, menos dos que quitamos al inicio, 180, lo cual indicamos con la opción *nrows*.
 
 ```{r}
-#choose.files()
-rutaCP <- "C:\\Users\\marur\\Desktop\\BIE_BIE20200604182657.csv"
-baseCP <- read.csv(rutaCP, 
+baseCP <- read.csv("https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/Bases/BIE_Des_Inf_2005-2019.csv", 
                     header = F,
                     skip = 2, 
                     nrows = 180,
@@ -105,28 +102,60 @@ baseCP <- read.csv(rutaCP,
 str(baseCP)
 ```
 
-Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria *zoo* (que tienes que instalar previamente), en especial la función *as.yearmon*. 
+Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria *lubridate* (que tienes que instalar previamente). Esta libreria tiene varias funciones cuya idea básica es indicarle en qué forma está escrita la fecha y el programa se encarga de convertirlo al formato adecuado. Para ver las funciones para otros formatos de fecha consulta la información de *lubridate*. 
+
+En este caso nuestra fecha tiene la forma de "y/m", es decir primero se indica el año y luego el mes, por lo que utilizaremos la función *ymd()*, añadiendo la opción *truncated=2* para indicarle que los dos últimos dígitos de la fecha, que corresponden al día, no aparecen en el nuestro formato. 
 
 ```{r}
-#### Convertir columna de fecha en meses a formato fecha
-baseCP$Periodo <- as.yearmon(baseCP$Periodo, format="%Y/%m")
-baseCP$Periodo <- as.Date(baseCP$Periodo)
+#library(lubridate)
+baseCP$Periodo <- ymd(baseCP$Periodo, truncated = 2)
 str(baseCP)
+```
+Ahora la variable periodo está en formato fecha y podremos trabajar con ella cómodamente, como se verá más adelante, en particular en la sección de gráficas. 
+
+## Banxico - SIE
+Otra fuente de datos importante es el Sistema de Información Económica ([SIE](https://www.banxico.org.mx/SieInternet/)) de Banxico. Dejo aquí cómo cargar bases de datos de ahí porque estas tienen ciertas particularidades. 
+
+Descargamos datos mensuales del indice de precios y cotizaciones (IPC), la tasa de interés sobre Cetes a 28 días y la tasa de interés sobre Udibonos a 10 años, esta última para mostrar qué ocurre cuando el periodo para el que descargamos los datos difiere entre series. Los datos faltantes en la base en las bases del SIE se representan con *N/E*, lo cual le tenemos que indicar a la función *read.csv* para que los lea de manera correcta, esto se hace con la opción *na.strings* como se muestra a continuación. 
+
+```{r}
+banxico <- read.csv("https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/Bases/SIE_IPC_Cetes28_1990-2019.csv", 
+                    header = F,
+                    skip = 18, 
+                    col.names = c("Periodo", "IPC", "Cetes28", "Udibonos10"), 
+                    na.strings = "N/E")
+str(banxico)
+```
+
+Nótese que una vez más la variable *Periodo* no está en formato fecha, así que la convertimos como hicimos antes. En este caso la fecha tiene el formato "d/m/y", es decir, primero el día, luego el mes y al final el año, por lo que ahora usamos la función *dmy()* de *lubridate*.
+
+```{r}
+banxico$Periodo <- dmy(banxico$Periodo)
+str(banxico)
 ```
 
 ## Agregación de datos
+También es un problema común que tienes tus datos en forma mensual pero los necesitas de manera trimestral o anual, lo cual se puede hacer fácilmente en R. Primero convertimos nuestra variable de interés en un objeto de series de tiempo de R, *ts*, y luego utilizamos la función *aggregate* como se muestra a continuación. En este caso usamos como método de agregación el promedio simple (*mean*), aunque se puede utilizar cualquier función que se desee con la opción *FUN=*.
 
 ```{r}
-des_men <- ts(baseCP$Desempleo, start = 2005, frequency = 12)
-des_trim <- aggregate(des_men, nfrequency = 4, mean)
-des_anual <- aggregate(des_men, nfrequency = 1, mean)
+#Convertir la serie a un objeto ts
+IPC_men <- ts(banxico$IPC, start = 1990, frequency = 12)
+
+#Utilizamos la función aggregate para convertirlo a otra unidad de tiempo
+#Trimestral
+IPC_trim <- aggregate(IPC_men, nfrequency = 4, mean)
+
+#Anual
+IPC_anual <- aggregate(IPC_men, nfrequency = 1, mean)
 ```
 
 ## Tasas de crecimiento 
+Otro problema común es calcular tasas de crecimiento, esto lo hacemos fácilmente con un *mutate* y la función *lag()* de la libreria *dplyr*. A continuación un ejemplo con los índices de precios. Primero calculamos la inflación mensual, es decir la variación porcentual del índice de precios de un mes a otro, y luego la inflación anual, i.e. la variación porcentual del índice de precios de un mes a respecto al mismo mes del año pasado, esto se hace añadiendo la opción *n=* para indicarle cuántos periodos atrás considerar el rezago. 
+
 ```{r}
-baseCP <- baseCP %>% mutate(inf_anual = ((Indice_inf/lag(Indice_inf, n=12))-1)*100, 
-                  inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100 )
-head(baseCP, n=20)
+baseCP <- baseCP %>% mutate(inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100,
+                            inf_anual = ((Indice_inf/lag(Indice_inf, n=12))-1)*100)
+head(baseCP[,-2], n=20)
 ```
 
 
@@ -134,7 +163,7 @@ head(baseCP, n=20)
 Hay muchos paquetes para hacer tablas como *kable*, *kableExtra* y *stargazer*.
 
 ## Kable
-Casi todo salio de [aquí](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html). Ahora un ejemplo con nuestra matriz **A**.
+Casi todo salio de [aquí](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html). Para usar kable debes instalar primero la libreria *knitr*. Ahora un ejemplo con nuestra matriz **A**. 
 ```{r}
 kable(A, 
       caption = "Primera matriz creada en forma de tabla",
@@ -148,6 +177,60 @@ En *kable* no se pueden cambiar los nombres a los renglones de una matriz, se ti
 rownames(B) <- c("$\\alpha$","$\\beta$","$\\gamma$")
 kable(B, col.names = c("$\\eta$","$\\delta$","$\\iota$"))
 ```
+
+Hacer presentable una tabla como la de la sección pasada resulta muy sencillo, sólo tenemos que modificar una de las opciones por default de kable para que aparerzcan en blanco los NA.
+```{r}
+#Para que aparerzcan en blanco los NA's.
+options(knitr.kable.NA = "")
+
+kable(head(baseCP[,-2], n=20),
+      digits = 2,
+      col.names = c("Periodo", "Inflación", "IPC", "Inflación anual (cálculo propio)", "Inflación mensual"))
+```
+
+## kableExtra
+
+La librería *kableExtra* (que debes instalar previamente) nos permite perzonalizar aún más las tablas de kable para que se vean más bonitas y añadir otras cosas como pie de página. Consulta [este sitio](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html) para que veas ejemplos de lo que se puede hacer. 
+
+Las cosas de kable se agregan con "pipes", %>%. Simplemente añadiendo *kable_styling()* hace que se vea más bonita, pero puedes agregar otras opciones como colores, niveles, etc. El pie de página se pone con la opción *footnote*, por default lo pone en dos niveles, lo que aparece después de *general_title* aparece el primer renglón y lo de *general* sale en el segundo, pero como prefiero que salga todo sólo en un renglón lo pongo como se ve enseguida. 
+
+```{r}
+kable(head(baseCP[,-2], n=20),
+      digits = 2,
+      col.names = c("Periodo", "Inflación", "IPC", 
+                    "Inflación anual (cálculo propio)", "Inflación mensual")) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "")
+```
+
+También podemos agrupar filas y columnas para que se vea más bonita. Para las columnas usamos la función *add_header_above* indicando dentro de un vector el nombre y para cuántas columnas se utilizará ese grupo. Para las filas usamos la función *pack_rows*, con la opción *index* y el la misma idea que para las columnas. 
+
+```{r}
+kable(head(baseCP[,-2], n=20),
+      digits = 2,
+      col.names = c("Periodo", "Inflación", "IPC", 
+                    "Inflación anual", "Inflación mensual")) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "") %>%
+  add_header_above(c(" " = 1, "INEGI" = 2, "Cálculo propio" = 2)) %>%
+  pack_rows(index = c("2005" = 12, "2006" = 8))
+```
+
+Para más glamour, el formato html nos permite presentar toda la tabla sin comer demasiado espacio, como muestro a continuación: 
+```{r}
+kable(baseCP[,-2],
+      digits = 2,
+      col.names = c("Periodo", "Inflación", "IPC", 
+                    "Inflación anual", "Inflación mensual")) %>%
+  kable_styling(full_width = T, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "") %>%
+  add_header_above(c(" " = 1, "INEGI" = 2, "Cálculo propio" = 2)) %>%
+  scroll_box(width = "800px", height = "300px")
+```
+
+
+
+Si quieres tus tablas para formato latex sólo tienes que añadir la opción *format="latex"* después dentro del comando de kable, o más fácil añadir desde el inicio del documento la opción *options(knitr.table.format = "html")* y todas las tablas saldrán en formato latex. Aunque las opciones son parecidas, te recomiendo que uses simplemente la opción *booktabs=T*, tú sabrás si te convence o no. 
 
 
 # Econometría 
@@ -172,8 +255,19 @@ Sabemos que el estimador de minimos cuadrados ordinarios es $\hat b_{MCO}=(X^{\p
 ```
 
 ## Propiedades estadísticas de los estimadores
-### Insesgadez
 
+De esta forma el modelo $Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i$ cumple con los supuestos del modelo de regresión lineal clásico, es decir: 
+\begin{enumerate}
+  \item linealidad en los parámetros;
+  \item observaciones provenientes de una muestra aleatoria;
+  \item no colinealidad perfecta entre variables explicativas; 
+  \item media condicional del término no observado igual a cero; 
+  \item heterocedasticidad; y
+  \item normalidad del término no observado, con media cero y varianza constante. 
+\end{enumerate}
+
+
+### Insesgadez
 Generamos una muestra i.i.d $\begin{pmatrix} X_{1i} \\ X_{2i} \end{pmatrix}_{i=1}^{400} \sim N \begin{pmatrix} \begin{pmatrix} 13 \\ 8 \end{pmatrix}, \begin{pmatrix} 4 & 0 \\ 0 & 4.5 \end{pmatrix} \end{pmatrix}$ de variables aleatorias i.i.d.
 ```{r}
 #Para plantar una "semilla" y se generen siempre los mismos números aleatorios
