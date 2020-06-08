@@ -336,10 +336,9 @@ $(document).ready(function () {
 <li><a href="#kable">Kable</a></li>
 <li><a href="#kableextra">kableExtra</a></li>
 </ul></li>
-<li><a href="#econometría">Econometría</a><ul>
-<li><a href="#propiedades-estadísticas-de-los-estimadores">Propiedades estadísticas de los estimadores</a><ul>
-<li><a href="#insesgadez">Insesgadez</a></li>
-</ul></li>
+<li><a href="#trabajar-bases-de-datos">Trabajar bases de datos</a></li>
+<li><a href="#gráficas">Gráficas</a><ul>
+<li><a href="#series-de-tiempo">Series de tiempo</a></li>
 </ul></li>
 </ul>
 </div>
@@ -380,7 +379,8 @@ sum (10,20,30)    # Función suma</code></pre>
 1:5               # Secuencia 1-5</code></pre>
 <pre><code>## [1] 1 2 3 4 5</code></pre>
 <pre class="r"><code>seq(1, 10, 0.5)   # Secuencia con incrementos diferentes a 1</code></pre>
-<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0  6.5  7.0  7.5  8.0  8.5  9.0  9.5 10.0</code></pre>
+<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0  6.5  7.0  7.5  8.0
+## [16]  8.5  9.0  9.5 10.0</code></pre>
 <pre class="r"><code>y[2]              # Acceder al segundo valor del vector y</code></pre>
 <pre><code>## [1] &quot;Secundaria&quot;</code></pre>
 <pre class="r"><code>(z &lt;- c(0, y, 5))   # Concatena escalares y vectores</code></pre>
@@ -485,7 +485,7 @@ str(baseCP)</code></pre>
 baseCP$Periodo &lt;- ymd(baseCP$Periodo, truncated = 2)
 str(baseCP)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    180 obs. of  4 variables:
-##  $ Periodo   : Date, format: &quot;2005-01-01&quot; &quot;2005-02-01&quot; &quot;2005-03-01&quot; ...
+##  $ Periodo   : Date, format: &quot;2005-01-01&quot; &quot;2005-02-01&quot; ...
 ##  $ Desempleo : num  3.64 3.55 3.63 3.57 3.68 ...
 ##  $ Inflacion : num  4.54 4.27 4.39 4.6 4.6 4.33 4.47 3.95 3.51 3.05 ...
 ##  $ Indice_inf: num  58.3 58.5 58.8 59 58.8 ...</code></pre>
@@ -510,7 +510,7 @@ str(banxico)</code></pre>
 <pre class="r"><code>banxico$Periodo &lt;- dmy(banxico$Periodo)
 str(banxico)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    365 obs. of  4 variables:
-##  $ Periodo   : Date, format: &quot;1990-01-01&quot; &quot;1990-02-01&quot; &quot;1990-03-01&quot; ...
+##  $ Periodo   : Date, format: &quot;1990-01-01&quot; &quot;1990-02-01&quot; ...
 ##  $ IPC       : num  445 473 490 526 650 ...
 ##  $ Cetes28   : num  41.3 45.2 46.6 44.6 36.9 ...
 ##  $ Udibonos10: num  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
@@ -690,7 +690,7 @@ options(knitr.kable.NA = &quot;&quot;)
 
 kable(head(baseCP[,-2], n=20),
       digits = 2,
-      col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, &quot;Inflación anual (cálculo propio)&quot;, &quot;Inflación mensual&quot;))</code></pre>
+      col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, &quot;Inflación mensual&quot;, &quot;Inflación anual&quot;))</code></pre>
 <table>
 <thead>
 <tr>
@@ -704,10 +704,10 @@ Inflación
 IPC
 </th>
 <th style="text-align:right;">
-Inflación anual (cálculo propio)
+Inflación mensual
 </th>
 <th style="text-align:right;">
-Inflación mensual
+Inflación anual
 </th>
 </tr>
 </thead>
@@ -1049,7 +1049,7 @@ Inflación mensual
 <pre class="r"><code>kable(head(baseCP[,-2], n=20),
       digits = 2,
       col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, 
-                    &quot;Inflación anual (cálculo propio)&quot;, &quot;Inflación mensual&quot;)) %&gt;%
+                    &quot;Inflación mensual&quot;, &quot;Inflación anual&quot;)) %&gt;%
   kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
   footnote(general_title = &quot;Fuente: elaboracion propia con datos de INEGI.&quot;, general = &quot;&quot;)</code></pre>
 <table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -1065,10 +1065,10 @@ Inflación
 IPC
 </th>
 <th style="text-align:right;">
-Inflación anual (cálculo propio)
+Inflación mensual
 </th>
 <th style="text-align:right;">
-Inflación mensual
+Inflación anual
 </th>
 </tr>
 </thead>
@@ -1414,11 +1414,11 @@ Inflación mensual
 </tr>
 </tfoot>
 </table>
-<p>También podemos agrupar filas y columnas para que se vea más bonita. Para las columnas usamos la función <em>add_header_above</em> indicando dentro de un vector el nombre y para cuántas columnas se utilizará ese grupo. Para las filas usamos la función <em>pack_rows</em>, con la opción <em>index</em> y el la misma idea que para las columnas.</p>
+<p>También podemos agrupar filas y columnas para que se vea más bonita. Para las columnas usamos la función <em>add_header_above</em> indicando dentro de un vector el nombre y para cuántas columnas se utilizará ese grupo. Para las filas usamos la función <em>pack_rows</em>, con la opción <em>index</em> y la misma idea que para las columnas.</p>
 <pre class="r"><code>kable(head(baseCP[,-2], n=20),
       digits = 2,
       col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, 
-                    &quot;Inflación anual&quot;, &quot;Inflación mensual&quot;)) %&gt;%
+                    &quot;Inflación mensual&quot;, &quot;Inflación anual&quot;)) %&gt;%
   kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
   footnote(general_title = &quot;Fuente: elaboracion propia con datos de INEGI.&quot;, general = &quot;&quot;) %&gt;%
   add_header_above(c(&quot; &quot; = 1, &quot;INEGI&quot; = 2, &quot;Cálculo propio&quot; = 2)) %&gt;%
@@ -1450,10 +1450,10 @@ Inflación
 IPC
 </th>
 <th style="text-align:right;">
-Inflación anual
+Inflación mensual
 </th>
 <th style="text-align:right;">
-Inflación mensual
+Inflación anual
 </th>
 </tr>
 </thead>
@@ -1813,7 +1813,7 @@ Inflación mensual
 <pre class="r"><code>kable(baseCP[,-2],
       digits = 2,
       col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, 
-                    &quot;Inflación anual&quot;, &quot;Inflación mensual&quot;)) %&gt;%
+                    &quot;Inflación mensual&quot;, &quot;Inflación anual&quot;)) %&gt;%
   kable_styling(full_width = T, bootstrap_options = &quot;striped&quot;) %&gt;%
   footnote(general_title = &quot;Fuente: elaboracion propia con datos de INEGI.&quot;, general = &quot;&quot;) %&gt;%
   add_header_above(c(&quot; &quot; = 1, &quot;INEGI&quot; = 2, &quot;Cálculo propio&quot; = 2)) %&gt;%
@@ -1846,10 +1846,10 @@ Inflación
 IPC
 </th>
 <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-Inflación anual
+Inflación mensual
 </th>
 <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-Inflación mensual
+Inflación anual
 </th>
 </tr>
 </thead>
@@ -4919,84 +4919,71 @@ Inflación mensual
 <p>Si quieres tus tablas para formato latex sólo tienes que añadir la opción <em>format=“latex”</em> después dentro del comando de kable, o más fácil añadir desde el inicio del documento la opción <em>options(knitr.table.format = “html”)</em> y todas las tablas saldrán en formato latex. Aunque las opciones son parecidas, te recomiendo que uses simplemente la opción <em>booktabs=T</em>, tú sabrás si te convence o no.</p>
 </div>
 </div>
-<div id="econometría" class="section level1">
-<h1>Econometría</h1>
-<p>Primero creamos una muestra aleatoria i.i.d: <span class="math display">\[
-\begin{Bmatrix} \begin{pmatrix}  Y_i \\ X_{1i}\\ X_{2i} \end{pmatrix} \end{Bmatrix}_{i=1}^{400} \sim N_3 \begin{bmatrix} \begin{pmatrix}  1 \\ 0\\ 2 \end{pmatrix}, \begin{pmatrix}  0.8 &amp; 0.4 &amp; -0.2 \\ 0.4 &amp; 1.0 &amp; -0.8 \\ -0.2 &amp; -0.8 &amp; 2.0 \end{pmatrix}  \end{bmatrix}.
-\]</span></p>
-<pre class="r"><code>#Para los parámetros
-mu &lt;- c(100,0,2)
-sigma &lt;- matrix(c(0.8, 0.4, -0.2, 0.4, 1, -0.8, -0.2, -0.8, 2), nrow = 3, byrow = T)
-#Para general la muestra 
-MA &lt;- mvrnorm(400,mu,sigma) #mvrnorm de la libreria MASS
-Y &lt;- MA[,1] 
-X &lt;- cbind(rep(1,400),MA[,2:3])</code></pre>
-<p>Sabemos que el estimador de minimos cuadrados ordinarios es <span class="math inline">\(\hat b_{MCO}=(X^{\prime}X)^{-1}X^{\prime}Y\)</span>, por lo que ahora podemos calcularlo fácilmente.</p>
-<pre class="r"><code>(b_mco &lt;- solve(t(X)%*%X)%*%t(X)%*%Y)</code></pre>
-<pre><code>##            [,1]
-## [1,] 99.7057781
-## [2,]  0.4935216
-## [3,]  0.1363669</code></pre>
-<div id="propiedades-estadísticas-de-los-estimadores" class="section level2">
-<h2>Propiedades estadísticas de los estimadores</h2>
-De esta forma el modelo <span class="math inline">\(Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i\)</span> cumple con los supuestos del modelo de regresión lineal clásico, es decir:
-
-<div id="insesgadez" class="section level3">
-<h3>Insesgadez</h3>
-<p>Generamos una muestra i.i.d <span class="math inline">\(\begin{pmatrix} X_{1i} \\ X_{2i} \end{pmatrix}_{i=1}^{400} \sim N \begin{pmatrix} \begin{pmatrix} 13 \\ 8 \end{pmatrix}, \begin{pmatrix} 4 &amp; 0 \\ 0 &amp; 4.5 \end{pmatrix} \end{pmatrix}\)</span> de variables aleatorias i.i.d.</p>
-<pre class="r"><code>#Para plantar una &quot;semilla&quot; y se generen siempre los mismos números aleatorios
-set.seed(2020)
-#Para los parámetros de la muestra
-mu &lt;- c(13,8)
-sigma &lt;- matrix(c(4, 0, 0, 4.5), nrow = 2, byrow = T)
-MA &lt;- mvrnorm(400,mu,sigma)</code></pre>
-<p>Ahora generamos una muestra i.i.d. <span class="math inline">\(\{U_i\}_{i=1}^{400}\)</span> de v.a.s i.i.d donde <span class="math inline">\(U_i \sim N(0,1)\)</span>, <span class="math inline">\(i=1,2,...,400\)</span> tal que <span class="math inline">\(U_i\)</span> y <span class="math inline">\(\mathbf{X}_i\)</span> son independientes <span class="math inline">\(\forall i \neq j\)</span> , <span class="math inline">\(i,j \in \{1,2,...,400\}\)</span>.</p>
-<pre class="r"><code>U &lt;- rnorm(400,mean=0,sd=1)</code></pre>
-<p>Con estos datos generamos la muestra <span class="math inline">\(\{Y_i\}_{i=1}^{400}\)</span> donde <span class="math inline">\(Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i\)</span> , <span class="math inline">\(i=1,2,...,400\)</span>.</p>
-<pre class="r"><code>Y &lt;- matrix(0, ncol=1, nrow=400)
-for(i in 1:400) {
-  Y[i,] &lt;- 0.6 + 0.9*MA[i,1] + 0.6*MA[i,2] + U[i]
-}</code></pre>
-<p>Ahora calculamos el estimador <span class="math inline">\(\hat{b}_{MCO}=\begin{pmatrix} \hat \beta_{0} \\ \hat \beta_{1} \\ \hat \beta_{2} \end{pmatrix}\)</span>:</p>
-<pre class="r"><code>#Primero formamos una matriz con un vector de unos al inicio para la constante 
-X_1 &lt;- cbind(rep(1,400),MA[,1],MA[,2])
-#Ahora sí estimamos b_mco
-b_mco &lt;- solve(t(X_1)%*%X_1)%*%t(X_1)%*%Y
-#Para presentar los resultados
-rownames(b_mco) &lt;- c(&quot;$\\beta_1$&quot;,&quot;$\\beta_2$&quot;,&quot;$\\beta_3$&quot;)
-kable(b_mco, caption = &quot;Resultados&quot;, digits = 3)</code></pre>
-<table>
-<caption>
-Resultados
-</caption>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<span class="math inline">\(\beta_1\)</span>
-</td>
-<td style="text-align:right;">
-0.745
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<span class="math inline">\(\beta_2\)</span>
-</td>
-<td style="text-align:right;">
-0.909
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<span class="math inline">\(\beta_3\)</span>
-</td>
-<td style="text-align:right;">
-0.567
-</td>
-</tr>
-</tbody>
-</table>
+<div id="trabajar-bases-de-datos" class="section level1">
+<h1>Trabajar bases de datos</h1>
+<p>La libreria más usada para manipular bases de datos es <em>tidyverse</em>, aquí te muestro sus funciones básicas. Se compone de cinco verbos principales:</p>
+<ul>
+<li>arrange, para reordenar las filas;</li>
+<li>filter, para filtrar o elegir las observaciones por sus valores;</li>
+<li>select, para seleccionar las variables;</li>
+<li>mutate, para crear nuevas variables con transformaciones de variables existentes;</li>
+<li>summarize, para contraer muchos valores en un solo resumen.</li>
+</ul>
+<p>Para ello normalmente requerirás de operadores lógicos:</p>
+<ul>
+<li><span class="math inline">\(&gt;\)</span>, mayor que;</li>
+<li><span class="math inline">\(&gt;=\)</span>, mayor o igual que;</li>
+<li>&lt;, menor que;</li>
+<li>&lt;=, menor o igual que;</li>
+<li>$!=, distinto de;</li>
+<li>==, igual a;</li>
+<li>&amp;, es “y”;</li>
+<li>|, es “o”;</li>
+<li>!, es “no”.</li>
+</ul>
 </div>
+<div id="gráficas" class="section level1">
+<h1>Gráficas</h1>
+<p>Te recomiendo usar el paquete <em>ggplot</em> que se carga junto con la libreria de <em>tidyverse</em>, el cual tiene un montón de formas de tunear tus gráficas. Si bien hay muchas formas de escribir una misma gráfica, te presenteo aquí la que me parece más sencilla. Primero indica tu base de datos, luego un “<em>pipe</em>”, y siempre deberás inciar con el comando <em>ggplot</em>, dentro del cual puedes meter una “estética” (<em>aes</em>) global, es decir lo que irá en cada eje <span class="math inline">\(x\)</span> y <span class="math inline">\(y\)</span>, entre otras cosas. Veamos algunos ejemplos.</p>
+<div id="series-de-tiempo" class="section level2">
+<h2>Series de tiempo</h2>
+<p>Como es obvio, en las gráficas de series de tiempo el tiempo siempre va en el eje de las x, lo que indicamos desde el inicio. Para agregar más de una linea se tienen que usar más de un <em>geom_line</em>, y para darle un color distinto a cada una usamos la opción <em>col</em> <strong>dentro del <em>aes</em> </strong>, indicando la etiqueta que queramos que aparezca para cada línea. Con la función <em>labs</em> le ponemos nombre a los ejes y a la gráfica (y hasta la nota al pie), cada una con su respectiva opción.</p>
+<pre class="r"><code>baseCP %&gt;% ggplot(aes(x=Periodo)) + 
+  geom_line(aes(y=Desempleo, col = &quot;Desempleo&quot;)) + 
+  geom_line(aes(y=Inflacion, col = &quot;Inflación&quot;)) +
+  labs(x = &quot;&quot;, y = &quot;&quot;, #-- Nombre a los ejes
+       title = &quot;México: inflación y desempleo, 2005 - 2019&quot;, #-- Nombre a la grafica
+       subtitle = (&quot;Porcentajes&quot;), #-- Subtítulo 
+       caption = &quot;Fuente: elaboración propia con datos de INEGI&quot;) + #-- Nota al pie
+    scale_x_date(date_breaks = &quot;1 year&quot;, #-- Indicar cada cuántos años aparecen en el eje
+               date_labels = &quot;%Y&quot;) + #-- Formato de fecha
+  theme_bw() + #-- Un tema en específico
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), #-- Rotar la etiqueta del eje x
+        legend.position = c(.1, .8), #-- Determinar la posición del cuadro de  etiquetas
+        legend.background = element_rect(fill = &quot;transparent&quot;) ) + #-- transparente del cuadro de et.
+  scale_color_brewer(name= NULL, #-- Nombre al cuadro de etiquetas
+                     palette = &quot;Dark2&quot;) #-- Paleta de colores</code></pre>
+<p><img src="Rbasicos_files/figure-html/unnamed-chunk-24-1.png" width="768" /></p>
+<p>Otra forma de ponerle los nombres a cada serie:</p>
+<pre class="r"><code>#
+labels &lt;- data.frame(etiqueta = c(&quot;Desempleo&quot;,&quot;Inflación&quot;), x = as.Date(c(&quot;2018-01-01&quot;, &quot;2019-01-01&quot;)), y = c(3, 6))
+
+baseCP %&gt;% ggplot(aes(x=Periodo)) + 
+  geom_line(aes(y=Desempleo, col = &quot;Desempleo&quot;)) + 
+  geom_line(aes(y=Inflacion, col = &quot;Inflación&quot;)) +
+  labs(x = &quot;&quot;, y = &quot;&quot;, 
+       title = &quot;México: inflación y desempleo, 2005 - 2019&quot;,
+       subtitle = (&quot;Porcentajes&quot;), 
+       caption = &quot;Fuente: elaboración propia con datos de INEGI&quot;) +
+    scale_x_date(date_breaks = &quot;1 year&quot;, 
+               date_labels = &quot;%Y&quot;) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position = &quot;none&quot;) + 
+  scale_color_brewer(name= NULL, 
+                     palette = &quot;Dark2&quot;) +
+  geom_text(data = labels, aes(x, y, label = etiqueta), size = 4)</code></pre>
+<p><img src="Rbasicos_files/figure-html/unnamed-chunk-25-1.png" width="768" /></p>
 </div>
 </div>
 

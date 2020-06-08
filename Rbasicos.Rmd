@@ -17,7 +17,9 @@ pacman::p_load(tidyverse,
                knitr,
                kableExtra,
                MASS)
+knitr::opts_chunk$set(fig.width=8, fig.height=4.5)
 ```
+
 # Básicos 
 ## Limpiar el espacio de trabajo
 ```{r}
@@ -185,7 +187,7 @@ options(knitr.kable.NA = "")
 
 kable(head(baseCP[,-2], n=20),
       digits = 2,
-      col.names = c("Periodo", "Inflación", "IPC", "Inflación anual (cálculo propio)", "Inflación mensual"))
+      col.names = c("Periodo", "Inflación", "IPC", "Inflación mensual", "Inflación anual"))
 ```
 
 ## kableExtra
@@ -198,18 +200,18 @@ Las cosas de kable se agregan con "pipes", %>%. Simplemente añadiendo *kable_st
 kable(head(baseCP[,-2], n=20),
       digits = 2,
       col.names = c("Periodo", "Inflación", "IPC", 
-                    "Inflación anual (cálculo propio)", "Inflación mensual")) %>%
+                    "Inflación mensual", "Inflación anual")) %>%
   kable_styling(full_width = F, bootstrap_options = "striped") %>%
   footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "")
 ```
 
-También podemos agrupar filas y columnas para que se vea más bonita. Para las columnas usamos la función *add_header_above* indicando dentro de un vector el nombre y para cuántas columnas se utilizará ese grupo. Para las filas usamos la función *pack_rows*, con la opción *index* y el la misma idea que para las columnas. 
+También podemos agrupar filas y columnas para que se vea más bonita. Para las columnas usamos la función *add_header_above* indicando dentro de un vector el nombre y para cuántas columnas se utilizará ese grupo. Para las filas usamos la función *pack_rows*, con la opción *index* y la misma idea que para las columnas. 
 
 ```{r}
 kable(head(baseCP[,-2], n=20),
       digits = 2,
       col.names = c("Periodo", "Inflación", "IPC", 
-                    "Inflación anual", "Inflación mensual")) %>%
+                    "Inflación mensual", "Inflación anual")) %>%
   kable_styling(full_width = F, bootstrap_options = "striped") %>%
   footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "") %>%
   add_header_above(c(" " = 1, "INEGI" = 2, "Cálculo propio" = 2)) %>%
@@ -221,84 +223,80 @@ Para más glamour, el formato html nos permite presentar toda la tabla sin comer
 kable(baseCP[,-2],
       digits = 2,
       col.names = c("Periodo", "Inflación", "IPC", 
-                    "Inflación anual", "Inflación mensual")) %>%
+                    "Inflación mensual", "Inflación anual")) %>%
   kable_styling(full_width = T, bootstrap_options = "striped") %>%
   footnote(general_title = "Fuente: elaboracion propia con datos de INEGI.", general = "") %>%
   add_header_above(c(" " = 1, "INEGI" = 2, "Cálculo propio" = 2)) %>%
   scroll_box(width = "800px", height = "300px")
 ```
 
-
-
 Si quieres tus tablas para formato latex sólo tienes que añadir la opción *format="latex"* después dentro del comando de kable, o más fácil añadir desde el inicio del documento la opción *options(knitr.table.format = "html")* y todas las tablas saldrán en formato latex. Aunque las opciones son parecidas, te recomiendo que uses simplemente la opción *booktabs=T*, tú sabrás si te convence o no. 
 
 
-# Econometría 
-Primero creamos una muestra aleatoria i.i.d:
-$$
-\begin{Bmatrix} \begin{pmatrix}  Y_i \\ X_{1i}\\ X_{2i} \end{pmatrix} \end{Bmatrix}_{i=1}^{400} \sim N_3 \begin{bmatrix} \begin{pmatrix}  1 \\ 0\\ 2 \end{pmatrix}, \begin{pmatrix}  0.8 & 0.4 & -0.2 \\ 0.4 & 1.0 & -0.8 \\ -0.2 & -0.8 & 2.0 \end{pmatrix}  \end{bmatrix}.
-$$ 
+# Trabajar bases de datos 
+La libreria más usada para manipular bases de datos es *tidyverse*, aquí te muestro sus funciones básicas. Se compone de cinco verbos principales: 
+
+* arrange, para reordenar las filas;
+* filter, para filtrar o elegir las observaciones por sus valores; 
+* select, para seleccionar las variables; 
+* mutate, para crear nuevas variables con transformaciones de variables existentes; 
+* summarize, para contraer muchos valores en un solo resumen.
+
+Para ello normalmente requerirás de operadores lógicos: 
+
+* $>$, mayor que;
+* $>=$, mayor o igual que;
+* <, menor que; 
+* <=, menor o igual que; 
+* $!=, distinto de;
+* ==, igual a; 
+* &, es “y”; 
+* |, es “o”; 
+* !, es “no”.
+
+
+# Gráficas 
+Te recomiendo usar el paquete *ggplot* que se carga junto con la libreria de *tidyverse*, el cual tiene un montón de formas de tunear tus gráficas. Si bien hay muchas formas de escribir una misma gráfica, te presenteo aquí la que me parece más sencilla. Primero indica tu base de datos, luego un "*pipe*", y siempre deberás inciar con el comando *ggplot*, dentro del cual puedes meter una "estética" (*aes*) global, es decir lo que irá en cada eje $x$ y $y$, entre otras cosas. Veamos algunos ejemplos. 
+
+## Series de tiempo 
+Como es obvio, en las gráficas de series de tiempo el tiempo siempre va en el eje de las x, lo que indicamos desde el inicio. Para agregar más de una linea se tienen que usar más de un *geom_line*, y para darle un color distinto a cada una usamos la opción *col* **dentro del *aes* **, indicando la etiqueta que queramos que aparezca para cada línea. Con la función *labs* le ponemos nombre a los ejes y a la gráfica (y hasta la nota al pie), cada una con su respectiva opción. 
+
 ```{r}
-#Para los parámetros
-mu <- c(100,0,2)
-sigma <- matrix(c(0.8, 0.4, -0.2, 0.4, 1, -0.8, -0.2, -0.8, 2), nrow = 3, byrow = T)
-#Para general la muestra 
-MA <- mvrnorm(400,mu,sigma) #mvrnorm de la libreria MASS
-Y <- MA[,1] 
-X <- cbind(rep(1,400),MA[,2:3])
+baseCP %>% ggplot(aes(x=Periodo)) + 
+  geom_line(aes(y=Desempleo, col = "Desempleo")) + 
+  geom_line(aes(y=Inflacion, col = "Inflación")) +
+  labs(x = "", y = "", #-- Nombre a los ejes
+       title = "México: inflación y desempleo, 2005 - 2019", #-- Nombre a la grafica
+       subtitle = ("Porcentajes"), #-- Subtítulo 
+       caption = "Fuente: elaboración propia con datos de INEGI") + #-- Nota al pie
+    scale_x_date(date_breaks = "1 year", #-- Indicar cada cuántos años aparecen en el eje
+               date_labels = "%Y") + #-- Formato de fecha
+  theme_bw() + #-- Un tema en específico
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), #-- Rotar la etiqueta del eje x
+        legend.position = c(.1, .8), #-- Determinar la posición del cuadro de  etiquetas
+        legend.background = element_rect(fill = "transparent") ) + #-- transparente del cuadro de et.
+  scale_color_brewer(name= NULL, #-- Nombre al cuadro de etiquetas
+                     palette = "Dark2") #-- Paleta de colores
 ```
 
-Sabemos que el estimador de minimos cuadrados ordinarios es $\hat b_{MCO}=(X^{\prime}X)^{-1}X^{\prime}Y$, por lo que ahora podemos calcularlo fácilmente.
-
+Otra forma de ponerle los nombres a cada serie: 
 ```{r}
-(b_mco <- solve(t(X)%*%X)%*%t(X)%*%Y)
+#
+labels <- data.frame(etiqueta = c("Desempleo","Inflación"), x = as.Date(c("2018-01-01", "2019-01-01")), y = c(3, 6))
+
+baseCP %>% ggplot(aes(x=Periodo)) + 
+  geom_line(aes(y=Desempleo, col = "Desempleo")) + 
+  geom_line(aes(y=Inflacion, col = "Inflación")) +
+  labs(x = "", y = "", 
+       title = "México: inflación y desempleo, 2005 - 2019",
+       subtitle = ("Porcentajes"), 
+       caption = "Fuente: elaboración propia con datos de INEGI") +
+    scale_x_date(date_breaks = "1 year", 
+               date_labels = "%Y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position = "none") + 
+  scale_color_brewer(name= NULL, 
+                     palette = "Dark2") +
+  geom_text(data = labels, aes(x, y, label = etiqueta), size = 4)
 ```
-
-## Propiedades estadísticas de los estimadores
-
-De esta forma el modelo $Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i$ cumple con los supuestos del modelo de regresión lineal clásico, es decir: 
-\begin{enumerate}
-  \item linealidad en los parámetros;
-  \item observaciones provenientes de una muestra aleatoria;
-  \item no colinealidad perfecta entre variables explicativas; 
-  \item media condicional del término no observado igual a cero; 
-  \item heterocedasticidad; y
-  \item normalidad del término no observado, con media cero y varianza constante. 
-\end{enumerate}
-
-
-### Insesgadez
-Generamos una muestra i.i.d $\begin{pmatrix} X_{1i} \\ X_{2i} \end{pmatrix}_{i=1}^{400} \sim N \begin{pmatrix} \begin{pmatrix} 13 \\ 8 \end{pmatrix}, \begin{pmatrix} 4 & 0 \\ 0 & 4.5 \end{pmatrix} \end{pmatrix}$ de variables aleatorias i.i.d.
-```{r}
-#Para plantar una "semilla" y se generen siempre los mismos números aleatorios
-set.seed(2020)
-#Para los parámetros de la muestra
-mu <- c(13,8)
-sigma <- matrix(c(4, 0, 0, 4.5), nrow = 2, byrow = T)
-MA <- mvrnorm(400,mu,sigma)
-```
-
-Ahora generamos una muestra i.i.d. $\{U_i\}_{i=1}^{400}$ de v.a.s i.i.d donde $U_i \sim N(0,1)$, $i=1,2,...,400$ tal que $U_i$ y $\mathbf{X}_i$ son independientes $\forall i \neq j$ , $i,j \in  \{1,2,...,400\}$.
-```{r}
-U <- rnorm(400,mean=0,sd=1)
-```
-
-Con estos datos generamos la muestra $\{Y_i\}_{i=1}^{400}$  donde $Y_i=0.6+0.9X_{1i}+0.4X_{2i}+U_i$ , $i=1,2,...,400$.
-```{r}
-Y <- matrix(0, ncol=1, nrow=400)
-for(i in 1:400) {
-  Y[i,] <- 0.6 + 0.9*MA[i,1] + 0.6*MA[i,2] + U[i]
-}
-```
-
-Ahora calculamos el estimador $\hat{b}_{MCO}=\begin{pmatrix}  \hat \beta_{0} \\ \hat \beta_{1} \\ \hat \beta_{2} \end{pmatrix}$: 
-```{r}
-#Primero formamos una matriz con un vector de unos al inicio para la constante 
-X_1 <- cbind(rep(1,400),MA[,1],MA[,2])
-#Ahora sí estimamos b_mco
-b_mco <- solve(t(X_1)%*%X_1)%*%t(X_1)%*%Y
-#Para presentar los resultados
-rownames(b_mco) <- c("$\\beta_1$","$\\beta_2$","$\\beta_3$")
-kable(b_mco, caption = "Resultados", digits = 3)
-```
-
