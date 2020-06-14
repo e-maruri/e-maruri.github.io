@@ -15,10 +15,13 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -105,33 +108,33 @@ summary {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 51px;
+  padding-top: 54px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .section h2 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .section h3 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .section h4 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .section h5 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .section h6 {
-  padding-top: 56px;
-  margin-top: -56px;
+  padding-top: 59px;
+  margin-top: -59px;
 }
 .dropdown-submenu {
   position: relative;
@@ -251,6 +254,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -258,6 +324,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -309,96 +385,172 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">R mínimo para economistas</h1>
+<h4 class="date">13 de junio del 2020</h4>
 
 </div>
 
-<div id="TOC">
-<ul>
-<li><a href="#básicos">Básicos</a><ul>
-<li><a href="#limpiar-el-espacio-de-trabajo">Limpiar el espacio de trabajo</a></li>
-<li><a href="#tipos-de-datos">Tipos de datos</a></li>
-<li><a href="#vectores">Vectores</a></li>
-<li><a href="#matrices">Matrices</a><ul>
-<li><a href="#transpuesta">Transpuesta</a></li>
-<li><a href="#inversa">Inversa</a></li>
-<li><a href="#multiplicación">Multiplicación</a></li>
-<li><a href="#seleccionar-elementos-de-una-matriz">Seleccionar elementos de una matriz</a></li>
-<li><a href="#combinar-elementos-entre-matrices">Combinar elementos entre matrices</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#importar-bases-de-datos">Importar bases de datos</a><ul>
-<li><a href="#inegi---bie">INEGI - BIE</a></li>
-<li><a href="#banxico---sie">Banxico - SIE</a></li>
-<li><a href="#agregación-de-datos">Agregación de datos</a></li>
-<li><a href="#tasas-de-crecimiento">Tasas de crecimiento</a></li>
-</ul></li>
-<li><a href="#tablas">Tablas</a><ul>
-<li><a href="#kable">Kable</a></li>
-<li><a href="#kableextra">kableExtra</a></li>
-</ul></li>
-<li><a href="#trabajar-bases-de-datos">Trabajar bases de datos</a></li>
-<li><a href="#gráficas">Gráficas</a><ul>
-<li><a href="#series-de-tiempo">Series de tiempo</a></li>
-</ul></li>
-</ul>
-</div>
 
+<style>
+body {
+text-align: justify}
+</style>
 <div id="básicos" class="section level1">
 <h1>Básicos</h1>
 <div id="limpiar-el-espacio-de-trabajo" class="section level2">
 <h2>Limpiar el espacio de trabajo</h2>
 <pre class="r"><code>rm(list=ls())  </code></pre>
 </div>
+<div id="r-como-calculadora" class="section level2">
+<h2>R como calculadora</h2>
+<p>Operaciones básicas:</p>
+<ul>
+<li>suma, +</li>
+<li>resta, -</li>
+<li>multiplicación, *</li>
+<li>potenciación, ^</li>
+<li>módulo (el residuo de una división), %%</li>
+</ul>
+</div>
 <div id="tipos-de-datos" class="section level2">
 <h2>Tipos de datos</h2>
-<pre class="r"><code>c(&#39;a&#39;,&#39;b&#39;,&#39;c&#39;)  # Caracter</code></pre>
-<pre><code>## [1] &quot;a&quot; &quot;b&quot; &quot;c&quot;</code></pre>
-<pre class="r"><code>1:7             # Entero</code></pre>
-<pre><code>## [1] 1 2 3 4 5 6 7</code></pre>
-<pre class="r"><code>40&lt;80           # Valor logico</code></pre>
-<pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>2+2 == 5        # Valor logico</code></pre>
-<pre><code>## [1] FALSE</code></pre>
+<ul>
+<li>Valores con números decimales son <strong>numeric</strong>.</li>
+<li>Valores numéricos sin decimales son <strong>integers</strong> (también son <strong>numeric</strong>).</li>
+<li>Valores con texto (o <em>strings</em>) son llamados <strong>characters</strong>, en R aparecen entre comillas " ".</li>
+<li>Operadores booleanos son llamados lógicos (<strong>logical</strong>), i.e. TRUE o FALSE.
+<ul>
+<li>Los operadores relacionales en R son:
+<ul>
+<li>“&gt;”, mayor que;</li>
+<li>“&gt;=”, mayor o igual que;</li>
+<li>“&lt;”, menor que;</li>
+<li>“&lt;=”, menor o igual que;</li>
+<li>“!=”, distinto de;</li>
+<li>“==”, igual a;</li>
+</ul></li>
+</ul></li>
+</ul>
+<p>Comunmente trabajamos con objetos, los que definimos con “&lt;-” (tip: en windows alt + tecla - pone la flechita automáticamente), para luego utilizar operaciones básicas sobre estos objetos.</p>
+<pre class="r"><code>a &lt;- &#39;a&#39;        # Caracter
+b &lt;- 6          # Entero
+c &lt;- 4
+b+c             # Suma</code></pre>
+<pre><code>## [1] 10</code></pre>
+<pre class="r"><code>b%%c            # Módulo</code></pre>
+<pre><code>## [1] 2</code></pre>
 <pre class="r"><code>T == TRUE       # T expresion corta de verdadero</code></pre>
 <pre><code>## [1] TRUE</code></pre>
-<pre class="r"><code>h &lt;- 24         # Asignar un valor a la variable h 
-sum (10,20,30)    # Función suma</code></pre>
-<pre><code>## [1] 60</code></pre>
+<pre class="r"><code>F == FALSE      # F expresion corta de falso</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>b &lt; c           # Valor logico</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>2+2 == 5        # Valor logico</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>b != c          # Valor lógico</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Las operaciones matemáticas de la sección anterior sólo funcionan con valores numéricos, por ello es importante que cuando trabajemos con números éstos tengan el tipo de dato correcto. Para verificar esto existe la función <em>class()</em>.</p>
+<pre class="r"><code>class(&quot;1&quot;)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<pre class="r"><code>class(1)</code></pre>
+<pre><code>## [1] &quot;numeric&quot;</code></pre>
+<p>También puede que llegues a requerir los operadores lógicos:</p>
+<ul>
+<li>“&amp;” para Y o ambos.</li>
+<li>“|” para O ó al menos uno.</li>
+<li>“!” para NO o el complemento.</li>
+</ul>
+<p>Pues, por ejemplo, usar 3 &lt;x &lt;7 para verificar si x está entre 3 y 7 no funcionará en R; necesitarás 3 &lt;x &amp; x &lt;7 para eso.</p>
+<pre class="r"><code># Ejemplo
+x &lt;- 5
+3 &lt;x &amp; x &lt;7</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>También puede ser que necesites las declaraciones condicionales, como <em>if</em>, <em>if…else</em> y <em>else if</em>. Se puede utilizar el <em>if</em> de manera independiente de los otros dos, pero el <em>else if</em> y el <em>else</em> requieren siempre que haya primero un <em>if</em>. La estrucutra básica de los tres combinados la siguiente:</p>
+<pre class="r"><code># if(condition1) {
+# expr1
+# } else if(condition2) {
+# expr2
+# } else {
+# expr3 }</code></pre>
+<p>Es decir, si se cumple tal condición (indicada entre paréntesis), entonces haz lo que aparecé entre {}. Si la condición resulta FALSE, entonces R hace lo que está entre {} después del <em>else</em>. El <em>else if</em> indica, si la primera condición no se cumple, pero se cumple la segunda condición entre paréntesis, entonces realiza tal acción.</p>
+<p>El término <em>factor</em> se refiere a un tipo de datos utilizado para almacenar variables categóricas. La diferencia entre una variable categórica y una variable continua es que una variable categórica puede pertenecer a un número limitado de categorías. Una variable continua, por otro lado, puede corresponder a un número infinito de valores.</p>
+<p>El tipo de dato <em>factor</em> se utiliza principalmente para resumir datos por categorías o identificar cláramente cosas en una gráfica, más adelante veremos algún ejemplo de cómo usarlos. Puedes crear factores con la función <em>factor()</em>.</p>
+<p>Ejemplo. Un vector que contiene 5 observaciones del sexo de una población contiene sólo dos factores o niveles, “hombre” y “mujer”, que se pueden resumir fácilmente como se muestra a continuación.</p>
+<pre class="r"><code>sex &lt;- c(&quot;Male&quot;,&quot;Female&quot;,&quot;Female&quot;,&quot;Male&quot;,&quot;Male&quot;)
+fac_sex &lt;- factor(sex)
+# Puedes renombrar los niveles 
+levels(fac_sex) &lt;- c(&quot;Mujer&quot;, &quot;Hombre&quot;)
+fac_sex</code></pre>
+<pre><code>## [1] Hombre Mujer  Mujer  Hombre Hombre
+## Levels: Mujer Hombre</code></pre>
+<pre class="r"><code># Resumir los datos por factores
+summary(fac_sex)</code></pre>
+<pre><code>##  Mujer Hombre 
+##      2      3</code></pre>
+</div>
+<div id="vectores" class="section level2">
+<h2>Vectores</h2>
+<p>Los vectores son uno de los objetos más usados en R. Los vectores son matrices columna (<span class="math inline">\(n\mathrm{x}1\)</span>) que pueden contener datos numéricos, datos de caracteres o datos lógicos, i.e. un vector es una herramienta simple para almacenar datos. Para crear un vector se usa la función combinar <strong>c()</strong>.</p>
+<pre class="r"><code>vector_numerico &lt;- c(1, 2, 3)
+vector_caracter &lt;- c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</code></pre>
+<p>Se puede asignar un nombre a cada elemento de un vector con la función <strong>names()</strong>.</p>
+<pre class="r"><code>names(vector_numerico) &lt;- vector_caracter
+#Nótese que el primer renglón son sólo los nombres de las variables
+vector_numerico</code></pre>
+<pre><code>## a b c 
+## 1 2 3</code></pre>
+<p>Las operaciones básicas también funcionan con vectores.</p>
+<pre class="r"><code># Creamos otro vector
+vector_numerico2 &lt;- c(5*1.5, 7-2, 7+3)
+names(vector_numerico2) &lt;- vector_caracter
+# Suma de vectores
+vector_numerico + vector_numerico2</code></pre>
+<pre><code>##    a    b    c 
+##  8.5  7.0 13.0</code></pre>
+<pre class="r"><code># Producto de vectores (nótese que el producto es elemento a elemento) 
+vector_numerico * vector_numerico2</code></pre>
+<pre><code>##    a    b    c 
+##  7.5 10.0 30.0</code></pre>
+<pre class="r"><code># Valores lógicos con vectores
+vector_numerico2 != 5</code></pre>
+<pre><code>##     a     b     c 
+##  TRUE FALSE  TRUE</code></pre>
+<p>Algunas funciones útiles.</p>
 <pre class="r"><code>rep(&#39;R&#39;, times=3) # Repite la letra R el número de veces que se indica</code></pre>
 <pre><code>## [1] &quot;R&quot; &quot;R&quot; &quot;R&quot;</code></pre>
 <pre class="r"><code>sqrt(9)           # Raíz cuadrada de 9</code></pre>
 <pre><code>## [1] 3</code></pre>
-</div>
-<div id="vectores" class="section level2">
-<h2>Vectores</h2>
-<pre class="r"><code>(a &lt;- c(1,2,3,4,5,6)) </code></pre>
-<pre><code>## [1] 1 2 3 4 5 6</code></pre>
-<pre class="r"><code>(b &lt;- c(1:9))</code></pre>
-<pre><code>## [1] 1 2 3 4 5 6 7 8 9</code></pre>
-<pre class="r"><code>y &lt;- c(&#39;Primaria&#39;, &#39;Secundaria&#39;) # Vector caracteres
-1:5               # Secuencia 1-5</code></pre>
-<pre><code>## [1] 1 2 3 4 5</code></pre>
-<pre class="r"><code>seq(1, 10, 0.5)   # Secuencia con incrementos diferentes a 1</code></pre>
-<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0  6.5  7.0  7.5  8.0
-## [16]  8.5  9.0  9.5 10.0</code></pre>
-<pre class="r"><code>y[2]              # Acceder al segundo valor del vector y</code></pre>
-<pre><code>## [1] &quot;Secundaria&quot;</code></pre>
-<pre class="r"><code>(z &lt;- c(0, y, 5))   # Concatena escalares y vectores</code></pre>
-<pre><code>## [1] &quot;0&quot;          &quot;Primaria&quot;   &quot;Secundaria&quot; &quot;5&quot;</code></pre>
+<pre class="r"><code>1:10              # Secuencia 1 a 10</code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<pre class="r"><code>seq(1, 10, 0.5)   # Secuencia del 1 a 10 con incrementos de 0.5</code></pre>
+<pre><code>##  [1]  1.0  1.5  2.0  2.5  3.0  3.5  4.0  4.5  5.0  5.5  6.0  6.5  7.0
+## [14]  7.5  8.0  8.5  9.0  9.5 10.0</code></pre>
+<pre class="r"><code>vector_numerico2[2]     # Acceder al segundo valor de un vector</code></pre>
+<pre><code>## b 
+## 5</code></pre>
+<pre class="r"><code>vector_numerico2[&quot;b&quot;]   # Acceder al segundo valor de un vector que tiene nombre</code></pre>
+<pre><code>## b 
+## 5</code></pre>
+<pre class="r"><code>vector_numerico2[2:3]   # Acceder al 2do y tercer valor de un vector </code></pre>
+<pre><code>##  b  c 
+##  5 10</code></pre>
+<pre class="r"><code>vector_numerico2[c(&quot;b&quot;, &quot;c&quot;)]   # Acceder al 2do y tercer valor de un vector que tiene nombre</code></pre>
+<pre><code>##  b  c 
+##  5 10</code></pre>
+<pre class="r"><code>sum(vector_numerico)    # Suma de los elementos indicados</code></pre>
+<pre><code>## [1] 6</code></pre>
+<pre class="r"><code>mean(vector_numerico2)  # Promedio simple</code></pre>
+<pre><code>## [1] 7.5</code></pre>
+<pre class="r"><code>min(vector_numerico2)   # Obtener el valor minimo de un vector</code></pre>
+<pre><code>## [1] 5</code></pre>
+<pre class="r"><code>max(vector_numerico2)   # Obtener el valor máximo de un vector</code></pre>
+<pre><code>## [1] 10</code></pre>
 </div>
 <div id="matrices" class="section level2">
 <h2>Matrices</h2>
-<p>Para crear matrices con los vectores <strong>a</strong> y <strong>b</strong>:</p>
-<pre class="r"><code>(A &lt;- matrix(a, ncol=2, byrow = TRUE))</code></pre>
-<pre><code>##      [,1] [,2]
-## [1,]    1    2
-## [2,]    3    4
-## [3,]    5    6</code></pre>
-<pre class="r"><code>(B &lt;- matrix(b, ncol=3, byrow = T))</code></pre>
-<pre><code>##      [,1] [,2] [,3]
-## [1,]    1    2    3
-## [2,]    4    5    6
-## [3,]    7    8    9</code></pre>
+<p>En R, una matriz es una colección de elementos del mismo tipo de datos (numéricos, caracteres o lógicos) organizados en un número fijo de filas y columnas.</p>
+<p>Las matrices se crean con la función <strong>matrix()</strong>, primero se indica el conjunto de datos que conforman la matriz, luego se le indica el número de filas o columnas (o ambos), y <strong>byrow</strong> le indica que queremos que ponga los datos empezando por las columnas.</p>
+<pre class="r"><code>A &lt;- matrix(1:6, ncol=2, byrow = TRUE)
+B &lt;- matrix(seq(2,18,2), ncol=3, byrow = T)</code></pre>
 <p>Para ponerle nombre a las filas y columnas de la matriz <strong>A</strong></p>
 <pre class="r"><code>colnames(A) &lt;- c(&quot;X&quot;,&quot;Y&quot;)
 rownames(A) &lt;- c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;)
@@ -407,57 +559,113 @@ A</code></pre>
 ## A 1 2
 ## B 3 4
 ## C 5 6</code></pre>
-<div id="transpuesta" class="section level3">
-<h3>Transpuesta</h3>
+<div id="operaciones-con-matrices" class="section level3">
+<h3>Operaciones con matrices</h3>
+<p>Para sumar los elementos de las filas de una matriz usamos la función <strong>rowSums()</strong>. Se puede hacer lo mismo con las filas conla función <strong>colSums()</strong>.</p>
+<pre class="r"><code>rowSums(A)</code></pre>
+<pre><code>##  A  B  C 
+##  3  7 11</code></pre>
+<pre class="r"><code>colSums(A)</code></pre>
+<pre><code>##  X  Y 
+##  9 12</code></pre>
+<p>Similar a lo que ha aprendido con los vectores, los operadores estándar como +, -, /, *, etc. funcionan elemento a elemento en R (por lo que para sumar o multiplicar dos matrices estas deben tener la misma dimensión).</p>
+<div id="transpuesta" class="section level4">
+<h4>Transpuesta</h4>
 <pre class="r"><code>t(A)</code></pre>
 <pre><code>##   A B C
 ## X 1 3 5
 ## Y 2 4 6</code></pre>
 </div>
-<div id="inversa" class="section level3">
-<h3>Inversa</h3>
+<div id="inversa" class="section level4">
+<h4>Inversa</h4>
 <pre class="r"><code>solve(B^2) #Elevamos B al cuadrado porque sino no era invertible</code></pre>
-<pre><code>##            [,1]       [,2]       [,3]
-## [1,]  1.2916667 -1.1666667  0.3750000
-## [2,] -2.1666667  1.6666667 -0.5000000
-## [3,]  0.9305556 -0.6111111  0.1805556</code></pre>
+<pre><code>##            [,1]       [,2]        [,3]
+## [1,]  0.3229167 -0.2916667  0.09375000
+## [2,] -0.5416667  0.4166667 -0.12500000
+## [3,]  0.2326389 -0.1527778  0.04513889</code></pre>
 </div>
-<div id="multiplicación" class="section level3">
-<h3>Multiplicación</h3>
-<p>Con el comando %*%.</p>
+<div id="multiplicación-de-matrices" class="section level4">
+<h4>Multiplicación de matrices</h4>
+<p>Para realizar la multiplicación de matrices convencional (al igual que en álgebra lineal), utilizamos el comando %*%.</p>
 <pre class="r"><code>B%*%A</code></pre>
-<pre><code>##       X   Y
-## [1,] 22  28
-## [2,] 49  64
-## [3,] 76 100</code></pre>
+<pre><code>##        X   Y
+## [1,]  44  56
+## [2,]  98 128
+## [3,] 152 200</code></pre>
+</div>
 </div>
 <div id="seleccionar-elementos-de-una-matriz" class="section level3">
 <h3>Seleccionar elementos de una matriz</h3>
-<p>Usando [,] justo después de la matriz, donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.</p>
+<p>Al igual que con los vectores, seleccionamos elementos de una matriz usando [] justo después de la matriz. En este caso, se usa con una coma enmedio [,] donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.</p>
 <pre class="r"><code>B[1,2]</code></pre>
-<pre><code>## [1] 2</code></pre>
+<pre><code>## [1] 4</code></pre>
 <pre class="r"><code>B[1:2,]</code></pre>
 <pre><code>##      [,1] [,2] [,3]
-## [1,]    1    2    3
-## [2,]    4    5    6</code></pre>
+## [1,]    2    4    6
+## [2,]    8   10   12</code></pre>
 </div>
 <div id="combinar-elementos-entre-matrices" class="section level3">
 <h3>Combinar elementos entre matrices</h3>
 <p>Se usa el comando <em>cbind</em> para unir columnas, y <em>rbind</em> para unir filas. Nótese que los argumentos deben tener la misma cantidad de renglones en el caso de <em>cbind</em>, y la misma cantidad de columnas en el caso de <em>rbind</em>.</p>
 <pre class="r"><code>cbind(A,B)</code></pre>
-<pre><code>##   X Y      
-## A 1 2 1 2 3
-## B 3 4 4 5 6
-## C 5 6 7 8 9</code></pre>
+<pre><code>##   X Y         
+## A 1 2  2  4  6
+## B 3 4  8 10 12
+## C 5 6 14 16 18</code></pre>
 <pre class="r"><code>rbind(A,B[,1:2])</code></pre>
-<pre><code>##   X Y
-## A 1 2
-## B 3 4
-## C 5 6
-##   1 2
-##   4 5
-##   7 8</code></pre>
+<pre><code>##    X  Y
+## A  1  2
+## B  3  4
+## C  5  6
+##    2  4
+##    8 10
+##   14 16</code></pre>
 </div>
+</div>
+<div id="data-frames" class="section level2">
+<h2>Data frames</h2>
+<p>Un <em>data frame</em> o conjunto de datos presenta las variables del conjunto como columnas y las observaciones como filas. Son esencialmente lo mismo que las matrices, pero a diferencia de estas, un <em>data frame</em> puede almacenar distintos tipos de datos al mismo tiempo.</p>
+<p>Puedes seleccionar y combinar distintos elementos de un <em>data frame</em> al igual que lo hicimos con las matrices, sólo que ahora hay una forma más sencilla de seleccionar una columna en particular: nombre_base$variable, i.e. colocando el signo de pesos “$” justo entre el nombre de la base y en nombre de la variable (es más sencillo de lo que parece aquí).</p>
+<p>Conviene siempre dar un primer vistazo al data frame con dos funciones:</p>
+<ul>
+<li>head(), que muestra las primeras seis renglones del data frame; y</li>
+<li>str(), que nos dice de manera resumida las características de las variables de la base de datos.</li>
+</ul>
+<p>Los ejemplos de <em>data frames</em> los dejamos para la sección de importar bases de datos, pues ésta es la forma en que R interpreta la mayoría de datos que utilizamos.</p>
+</div>
+<div id="listas" class="section level2">
+<h2>Listas</h2>
+<p>Una lista en R es un objeto que puede almacenar distintos tipos de objetos al mismo tiempo, por ejemplo, matrices, vectores, <em>data frames</em>, etc. Es relevante conocer este tipo de objeto porque cosas como las regresiones o las bases de datos espaciales (para hacer mapas) son interpretadas como listas en R.</p>
+<p>Puedes crear una lista con la función <em>list()</em>. Por poner un ejemplo:</p>
+<pre class="r"><code>mi_lista &lt;- list(vector_numerico, A, c(a,b))</code></pre>
+<p>Nótese que la lista contiene tres objetos indicados entre paréntesis cuadrados dobles “[[]]”, el primero es un vector numérico, el segundo un matriz y el tercero un vector de carateres.</p>
+<p>Para seleccionar elementos de una lista primero debes indicar el objeto dentro de la lista con los [[]], y luego con un sólo [] el elemento deseado. Por ejemplo:</p>
+<pre class="r"><code>mi_lista[[3]][1]</code></pre>
+<pre><code>## [1] &quot;a&quot;</code></pre>
+<p>Por ahora no nos compliquemos con las listas, éstas creo que serán útiles, sobre todo, en temas un poco más avanzados como hacer mapas o extraer un elemento particular de una regresión.</p>
+</div>
+<div id="funciones-y-paquetes" class="section level2">
+<h2>Funciones y paquetes</h2>
+<p>Las funciones en R son las que van seguidas de paréntesis, ya hemos usados muchas de ellas en este punto. Cada función tiene sus propios argumentos (algunas ni tienen), unos los tienes que indicar obligatoriamente, y otros están definidos por default así que los puedes cambiar si es necesario.</p>
+<p>Por ejemplo, la función <em>arg()</em> te dice los distintos argumentos que tiene otra función.</p>
+<pre class="r"><code>args(matrix)</code></pre>
+<pre><code>## function (data = NA, nrow = 1, ncol = 1, byrow = FALSE, dimnames = NULL) 
+## NULL</code></pre>
+<p>Hay dos formas de indicar los argumentos a una función de R:</p>
+<ol style="list-style-type: decimal">
+<li>Por nombre, i.e. indicando cada cosa (en el caso de matrix(data=x, nrow=y, etc.) ).</li>
+<li>Por orden, i.e. si el primer argumento de la función son los datos, no hace falta indicar explícitamente <em>data</em>.</li>
+</ol>
+<p>Siempre se recomienda ver la documentación de cada función antes de usarla para ver lo que tienes que indicarle, o bien para ver qué más puede hacer por ti. Para acceder a la documentación de una función puedes usar cualquiera de los siguientes caminos:</p>
+<pre class="r"><code># help(matrix)
+# ?matrix
+# Seleccionar la función y presionar F1</code></pre>
+<p>Si bien es sencillo crear tus propias funciones en R, la mayoría del tiempo recurrirás a funciones creadas por expertos en la programación de R, muchas de las cuales no vienen instaladas por default. Instalar paqueterías de 3ros es muy sencillo, sólo requiere de dos pasos:</p>
+<ol style="list-style-type: decimal">
+<li>Teclear en la consola la función <em>install.packages()</em>, indicando la paquetería entre comillas dentro del paréntesis y esperando a que termine; y</li>
+<li>Cargar la paquetería con la función <em>library()</em>.</li>
+</ol>
+<p>El primer paso sólo deberás hacerlo una vez en tu computadora, pero el segundo deberás hacerlo cada que inicies un nuevo espacio de trabajo.</p>
 </div>
 </div>
 <div id="importar-bases-de-datos" class="section level1">
@@ -465,7 +673,7 @@ A</code></pre>
 <div id="inegi---bie" class="section level2">
 <h2>INEGI - BIE</h2>
 <p>Una de las fuentes más comunes para descargar datos en México es el Banco de Información Económica (<a href="https://www.inegi.org.mx/sistemas/bie/">BIE</a>) del INEGI. Básicamente todos los tipos de archivos de datos se leen de la misma forma, con ligeras variantes entre unos y otros, así que si dominas una forma será fácil leer otros tipos de archivos.</p>
-<p>Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo cual no es útil para procesar los datos.</p>
+<p>Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo que no es útil para procesar los datos.</p>
 <p>Utilizamos la función <em>read.csv</em> para leer el archivo, el primer argumento contiene la ruta del archivo, usamos la opción <em>skip</em> para saltarnos las primeras dos filas del archivo, lo que combinamos con la opción <em>header = FALSE</em> para indicar que la primera fila del archivo no contiene los nombres de las variables, los cuales hemos determinado nosotros con la opción <em>col.names</em>. También hay que tener en cuenta que las bases descargadas del BIE suelen tener notas al final de los datos, si no las consideramos la base no se cargará de manera adecuada, lo cual podemos solucionar simplemente indicando el número máximo de renglones que queremos que lea, en este caso nuestro último renglón con datos es el 182, menos dos que quitamos al inicio, 180, lo cual indicamos con la opción <em>nrows</em>.</p>
 <pre class="r"><code>baseCP &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/Bases/BIE_Des_Inf_2005-2019.csv&quot;, 
                     header = F,
@@ -480,12 +688,12 @@ str(baseCP)</code></pre>
 ##  $ Inflacion : num  4.54 4.27 4.39 4.6 4.6 4.33 4.47 3.95 3.51 3.05 ...
 ##  $ Indice_inf: num  58.3 58.5 58.8 59 58.8 ...</code></pre>
 <p>Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria <em>lubridate</em> (que tienes que instalar previamente). Esta libreria tiene varias funciones cuya idea básica es indicarle en qué forma está escrita la fecha y el programa se encarga de convertirlo al formato adecuado. Para ver las funciones para otros formatos de fecha consulta la información de <em>lubridate</em>.</p>
-<p>En este caso nuestra fecha tiene la forma de “y/m”, es decir primero se indica el año y luego el mes, por lo que utilizaremos la función <em>ymd()</em>, añadiendo la opción <em>truncated=2</em> para indicarle que los dos últimos dígitos de la fecha, que corresponden al día, no aparecen en el nuestro formato.</p>
+<p>En este caso nuestra fecha tiene la forma de “y/m”, es decir primero se indica el año y luego el mes, por lo que utilizaremos la función <em>ymd()</em>, añadiendo la opción <em>truncated=2</em> para indicarle que los dos últimos dígitos de la fecha, que corresponden al día, no aparecen en nuestro formato.</p>
 <pre class="r"><code>#library(lubridate)
 baseCP$Periodo &lt;- ymd(baseCP$Periodo, truncated = 2)
 str(baseCP)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    180 obs. of  4 variables:
-##  $ Periodo   : Date, format: &quot;2005-01-01&quot; &quot;2005-02-01&quot; ...
+##  $ Periodo   : Date, format: &quot;2005-01-01&quot; ...
 ##  $ Desempleo : num  3.64 3.55 3.63 3.57 3.68 ...
 ##  $ Inflacion : num  4.54 4.27 4.39 4.6 4.6 4.33 4.47 3.95 3.51 3.05 ...
 ##  $ Indice_inf: num  58.3 58.5 58.8 59 58.8 ...</code></pre>
@@ -510,7 +718,7 @@ str(banxico)</code></pre>
 <pre class="r"><code>banxico$Periodo &lt;- dmy(banxico$Periodo)
 str(banxico)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    365 obs. of  4 variables:
-##  $ Periodo   : Date, format: &quot;1990-01-01&quot; &quot;1990-02-01&quot; ...
+##  $ Periodo   : Date, format: &quot;1990-01-01&quot; ...
 ##  $ IPC       : num  445 473 490 526 650 ...
 ##  $ Cetes28   : num  41.3 45.2 46.6 44.6 36.9 ...
 ##  $ Udibonos10: num  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
@@ -530,7 +738,7 @@ IPC_anual &lt;- aggregate(IPC_men, nfrequency = 1, mean)</code></pre>
 </div>
 <div id="tasas-de-crecimiento" class="section level2">
 <h2>Tasas de crecimiento</h2>
-<p>Otro problema común es calcular tasas de crecimiento, esto lo hacemos fácilmente con un <em>mutate</em> y la función <em>lag()</em> de la libreria <em>dplyr</em>. A continuación un ejemplo con los índices de precios. Primero calculamos la inflación mensual, es decir la variación porcentual del índice de precios de un mes a otro, y luego la inflación anual, i.e. la variación porcentual del índice de precios de un mes a respecto al mismo mes del año pasado, esto se hace añadiendo la opción <em>n=</em> para indicarle cuántos periodos atrás considerar el rezago.</p>
+<p>Otro problema común es calcular tasas de crecimiento, esto lo hacemos fácilmente con un <em>mutate</em> y la función <em>lag()</em> de la libreria <em>dplyr</em>. A continuación un ejemplo con los índices de precios. Primero calculamos la inflación mensual, es decir la variación porcentual del índice de precios de un mes a otro, y luego la inflación anual, i.e. la variación porcentual del índice de precios de un mes respecto al mismo mes del año pasado, esto se hace añadiendo la opción <em>n=</em> para indicarle cuántos periodos atrás considerar el rezago.</p>
 <pre class="r"><code>baseCP &lt;- baseCP %&gt;% mutate(inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100,
                             inf_anual = ((Indice_inf/lag(Indice_inf, n=12))-1)*100)
 head(baseCP[,-2], n=20)</code></pre>
@@ -561,7 +769,7 @@ head(baseCP[,-2], n=20)</code></pre>
 <h1>Tablas</h1>
 <p>Hay muchos paquetes para hacer tablas como <em>kable</em>, <em>kableExtra</em> y <em>stargazer</em>.</p>
 <div id="kable" class="section level2">
-<h2>Kable</h2>
+<h2>kable</h2>
 <p>Casi todo salio de <a href="https://bookdown.org/yihui/rmarkdown-cookbook/kable.html">aquí</a>. Para usar kable debes instalar primero la libreria <em>knitr</em>. Ahora un ejemplo con nuestra matriz <strong>A</strong>.</p>
 <pre class="r"><code>kable(A, 
       caption = &quot;Primera matriz creada en forma de tabla&quot;,
@@ -645,24 +853,10 @@ kable(B, col.names = c(&quot;$\\eta$&quot;,&quot;$\\delta$&quot;,&quot;$\\iota$&
 <span class="math inline">\(\alpha\)</span>
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
-3
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-<span class="math inline">\(\beta\)</span>
-</td>
-<td style="text-align:right;">
 4
-</td>
-<td style="text-align:right;">
-5
 </td>
 <td style="text-align:right;">
 6
@@ -670,21 +864,35 @@ kable(B, col.names = c(&quot;$\\eta$&quot;,&quot;$\\delta$&quot;,&quot;$\\iota$&
 </tr>
 <tr>
 <td style="text-align:left;">
-<span class="math inline">\(\gamma\)</span>
-</td>
-<td style="text-align:right;">
-7
+<span class="math inline">\(\beta\)</span>
 </td>
 <td style="text-align:right;">
 8
 </td>
 <td style="text-align:right;">
-9
+10
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(\gamma\)</span>
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+18
 </td>
 </tr>
 </tbody>
 </table>
-<p>Hacer presentable una tabla como la de la sección pasada resulta muy sencillo, sólo tenemos que modificar una de las opciones por default de kable para que aparerzcan en blanco los NA.</p>
+<p>Hacer más o menos presentable una tabla como la de la sección pasada resulta muy sencillo, sólo tenemos que modificar una de las opciones por default de kable para que aparerzcan en blanco los NA.</p>
 <pre class="r"><code>#Para que aparerzcan en blanco los NA&#39;s.
 options(knitr.kable.NA = &quot;&quot;)
 
@@ -1045,7 +1253,7 @@ Inflación anual
 <div id="kableextra" class="section level2">
 <h2>kableExtra</h2>
 <p>La librería <em>kableExtra</em> (que debes instalar previamente) nos permite perzonalizar aún más las tablas de kable para que se vean más bonitas y añadir otras cosas como pie de página. Consulta <a href="https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html">este sitio</a> para que veas ejemplos de lo que se puede hacer.</p>
-<p>Las cosas de kable se agregan con “pipes”, %&gt;%. Simplemente añadiendo <em>kable_styling()</em> hace que se vea más bonita, pero puedes agregar otras opciones como colores, niveles, etc. El pie de página se pone con la opción <em>footnote</em>, por default lo pone en dos niveles, lo que aparece después de <em>general_title</em> aparece el primer renglón y lo de <em>general</em> sale en el segundo, pero como prefiero que salga todo sólo en un renglón lo pongo como se ve enseguida.</p>
+<p>Las cosas de kableExtra se agregan con “pipes”, %&gt;%. Simplemente añadiendo <em>kable_styling()</em> hace que se vea más bonita, pero puedes agregar otras opciones como colores, niveles, etc. El pie de página se pone con la opción <em>footnote</em>, por default lo pone en dos niveles, lo que aparece después de <em>general_title</em> aparece el primer renglón y lo de <em>general</em> sale en el segundo, pero como prefiero que salga todo sólo en un renglón lo pongo como se ve enseguida.</p>
 <pre class="r"><code>kable(head(baseCP[,-2], n=20),
       digits = 2,
       col.names = c(&quot;Periodo&quot;, &quot;Inflación&quot;, &quot;IPC&quot;, 
@@ -4929,14 +5137,8 @@ Inflación anual
 <li>mutate, para crear nuevas variables con transformaciones de variables existentes;</li>
 <li>summarize, para contraer muchos valores en un solo resumen.</li>
 </ul>
-<p>Para ello normalmente requerirás de operadores lógicos:</p>
+<p>Para ello normalmente requerirás de operadores lógicos mostrados al inicio, además de los siguientes:</p>
 <ul>
-<li><span class="math inline">\(&gt;\)</span>, mayor que;</li>
-<li><span class="math inline">\(&gt;=\)</span>, mayor o igual que;</li>
-<li>&lt;, menor que;</li>
-<li>&lt;=, menor o igual que;</li>
-<li>$!=, distinto de;</li>
-<li>==, igual a;</li>
 <li>&amp;, es “y”;</li>
 <li>|, es “o”;</li>
 <li>!, es “no”.</li>
@@ -4963,7 +5165,7 @@ Inflación anual
         legend.background = element_rect(fill = &quot;transparent&quot;) ) + #-- transparente del cuadro de et.
   scale_color_brewer(name= NULL, #-- Nombre al cuadro de etiquetas
                      palette = &quot;Dark2&quot;) #-- Paleta de colores</code></pre>
-<p><img src="Rbasicos_files/figure-html/unnamed-chunk-24-1.png" width="768" /></p>
+<p><img src="Rbasicos_files/figure-html/unnamed-chunk-36-1.png" width="768" /></p>
 <p>Otra forma de ponerle los nombres a cada serie:</p>
 <pre class="r"><code>#
 labels &lt;- data.frame(etiqueta = c(&quot;Desempleo&quot;,&quot;Inflación&quot;), x = as.Date(c(&quot;2018-01-01&quot;, &quot;2019-01-01&quot;)), y = c(3, 6))
@@ -4983,12 +5185,14 @@ baseCP %&gt;% ggplot(aes(x=Periodo)) +
   scale_color_brewer(name= NULL, 
                      palette = &quot;Dark2&quot;) +
   geom_text(data = labels, aes(x, y, label = etiqueta), size = 4)</code></pre>
-<p><img src="Rbasicos_files/figure-html/unnamed-chunk-25-1.png" width="768" /></p>
+<p><img src="Rbasicos_files/figure-html/unnamed-chunk-37-1.png" width="768" /></p>
 </div>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -5021,6 +5225,32 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

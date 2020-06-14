@@ -1,14 +1,22 @@
 ---
 title: "R mínimo para economistas"
+date: "`r format(Sys.time(), '%d de %B del %Y')`"
 output:
   html_document:
     toc: true
     toc_depth: 3
+    toc_float: true
+    theme: lumen
 header:
   - \usepackage{amsmath}
   - \usepackage[spanish]{babel}
   - \selectlanguage{spanish}
 ---
+
+<style>
+body {
+text-align: justify}
+</style>
 
 ```{r, echo=FALSE}
 pacman::p_load(tidyverse, 
@@ -25,72 +33,246 @@ knitr::opts_chunk$set(fig.width=8, fig.height=4.5)
 ```{r}
 rm(list=ls())  
 ```
+## R como calculadora 
+Operaciones básicas: 
+
+* suma, +
+* resta, - 
+* multiplicación, *
+* potenciación, ^
+* módulo (el residuo de una división), %% 
+
 ## Tipos de datos
+* Valores con números decimales son **numeric**. 
+* Valores numéricos sin decimales son **integers** (también son **numeric**).
+* Valores con texto (o *strings*) son llamados **characters**, en R aparecen entre comillas " ". 
+* Operadores booleanos son llamados lógicos (**logical**), i.e. TRUE o FALSE. 
+  * Los operadores relacionales en R son: 
+    * ">", mayor que;
+    * ">=", mayor o igual que;
+    * "<", menor que; 
+    * "<=", menor o igual que; 
+    * "!=", distinto de;
+    * "==", igual a; 
+
+Comunmente trabajamos con objetos, los que definimos con "<-" (tip: en windows alt + tecla - pone la flechita automáticamente), para luego utilizar operaciones básicas sobre estos objetos. 
 ```{r}
-c('a','b','c')  # Caracter
-1:7             # Entero
-40<80           # Valor logico
-2+2 == 5        # Valor logico
+a <- 'a'        # Caracter
+b <- 6          # Entero
+c <- 4
+b+c             # Suma
+b%%c            # Módulo
 T == TRUE       # T expresion corta de verdadero
-h <- 24         # Asignar un valor a la variable h 
-sum (10,20,30)    # Función suma
-rep('R', times=3) # Repite la letra R el número de veces que se indica
-sqrt(9)           # Raíz cuadrada de 9
+F == FALSE      # F expresion corta de falso
+b < c           # Valor logico
+2+2 == 5        # Valor logico
+b != c          # Valor lógico
 ```
 
+Las operaciones matemáticas de la sección anterior sólo funcionan con valores numéricos, por ello es importante que cuando trabajemos con números éstos tengan el tipo de dato correcto. Para verificar esto existe la función *class()*. 
+```{r}
+class("1")
+class(1)
+```
+
+También puede que llegues a requerir los operadores lógicos: 
+
+* "&" para Y o ambos.
+* "|" para O ó al menos uno.
+* "!" para NO o el complemento.
+
+Pues, por ejemplo, usar 3 <x <7 para verificar si x está entre 3 y 7 no funcionará en R; necesitarás 3 <x & x <7 para eso.
+``` {r}
+# Ejemplo
+x <- 5
+3 <x & x <7
+```
+
+También puede ser que necesites las declaraciones condicionales, como *if*, *if...else* y *else if*. Se puede utilizar el *if* de manera independiente de los otros dos, pero el *else if* y el *else* requieren siempre que haya primero un *if*. La estrucutra básica de los tres combinados la siguiente: 
+```{r}
+# if(condition1) {
+# expr1
+# } else if(condition2) {
+# expr2
+# } else {
+# expr3 }
+```
+Es decir, si se cumple tal condición (indicada entre paréntesis), entonces haz lo que aparecé entre {}. Si la condición resulta FALSE, entonces R hace lo que está entre {} después del *else*. El *else if* indica, si la primera condición no se cumple, pero se cumple la segunda condición entre paréntesis, entonces realiza tal acción. 
+
+El término *factor* se refiere a un tipo de datos utilizado para almacenar variables categóricas. La diferencia entre una variable categórica y una variable continua es que una variable categórica puede pertenecer a un número limitado de categorías. Una variable continua, por otro lado, puede corresponder a un número infinito de valores. 
+
+El tipo de dato *factor* se utiliza principalmente para resumir datos por categorías o identificar cláramente cosas en una gráfica, más adelante veremos algún ejemplo de cómo usarlos. Puedes crear factores con la función *factor()*. 
+
+Ejemplo. Un vector que contiene 5 observaciones del sexo de una población contiene sólo dos factores o niveles, "hombre" y "mujer", que se pueden resumir fácilmente como se muestra a continuación. 
+```{r}
+sex <- c("Male","Female","Female","Male","Male")
+fac_sex <- factor(sex)
+# Puedes renombrar los niveles 
+levels(fac_sex) <- c("Mujer", "Hombre")
+fac_sex
+# Resumir los datos por factores
+summary(fac_sex)
+```
+
+
 ## Vectores
+Los vectores son uno de los objetos más usados en R. Los vectores son matrices columna ($n\mathrm{x}1$) que pueden contener datos numéricos, datos de caracteres o datos lógicos, i.e. un vector es una herramienta simple para almacenar datos. Para crear un vector se usa la función combinar **c()**. 
 ```{r}
-(a <- c(1,2,3,4,5,6)) 
-(b <- c(1:9))
-y <- c('Primaria', 'Secundaria') # Vector caracteres
-1:5               # Secuencia 1-5
-seq(1, 10, 0.5)   # Secuencia con incrementos diferentes a 1
-y[2]              # Acceder al segundo valor del vector y
-(z <- c(0, y, 5))   # Concatena escalares y vectores
+vector_numerico <- c(1, 2, 3)
+vector_caracter <- c("a", "b", "c")
 ```
+
+Se puede asignar un nombre a cada elemento de un vector con la función **names()**. 
+```{r}
+names(vector_numerico) <- vector_caracter
+#Nótese que el primer renglón son sólo los nombres de las variables
+vector_numerico
+```
+Las operaciones básicas también funcionan con vectores. 
+```{r}
+# Creamos otro vector
+vector_numerico2 <- c(5*1.5, 7-2, 7+3)
+names(vector_numerico2) <- vector_caracter
+# Suma de vectores
+vector_numerico + vector_numerico2
+# Producto de vectores (nótese que el producto es elemento a elemento) 
+vector_numerico * vector_numerico2
+# Valores lógicos con vectores
+vector_numerico2 != 5
+```
+
+Algunas funciones útiles. 
+```{r}
+rep('R', times=3) # Repite la letra R el número de veces que se indica
+sqrt(9)           # Raíz cuadrada de 9
+1:10              # Secuencia 1 a 10
+seq(1, 10, 0.5)   # Secuencia del 1 a 10 con incrementos de 0.5
+
+vector_numerico2[2]     # Acceder al segundo valor de un vector
+vector_numerico2["b"]   # Acceder al segundo valor de un vector que tiene nombre
+vector_numerico2[2:3]   # Acceder al 2do y tercer valor de un vector 
+vector_numerico2[c("b", "c")]   # Acceder al 2do y tercer valor de un vector que tiene nombre
+
+sum(vector_numerico)    # Suma de los elementos indicados
+mean(vector_numerico2)  # Promedio simple
+min(vector_numerico2)   # Obtener el valor minimo de un vector
+max(vector_numerico2)   # Obtener el valor máximo de un vector
+```
+
 ## Matrices 
-Para crear matrices con los vectores **a** y **b**: 
+En R, una matriz es una colección de elementos del mismo tipo de datos (numéricos, caracteres o lógicos) organizados en un número fijo de filas y columnas.
+
+Las matrices se crean con la función **matrix()**, primero se indica el conjunto de datos que conforman la matriz, luego se le indica el número de filas o columnas (o ambos), y **byrow** le indica que queremos que ponga los datos empezando por las columnas. 
+
 ```{r}
-(A <- matrix(a, ncol=2, byrow = TRUE))
-(B <- matrix(b, ncol=3, byrow = T))
+A <- matrix(1:6, ncol=2, byrow = TRUE)
+B <- matrix(seq(2,18,2), ncol=3, byrow = T)
 ```
+
 Para ponerle nombre a las filas y columnas de la matriz **A**
 ```{r}
 colnames(A) <- c("X","Y")
 rownames(A) <- c("A","B","C")
 A
 ```
-### Transpuesta
+
+### Operaciones con matrices
+Para sumar los elementos de las filas de una matriz usamos la función **rowSums()**. Se puede hacer lo mismo con las filas conla función **colSums()**.
+```{r}
+rowSums(A)
+colSums(A)
+```
+
+Similar a lo que ha aprendido con los vectores, los operadores estándar como +, -, /, *, etc. funcionan elemento a elemento en R (por lo que para sumar o multiplicar dos matrices estas deben tener la misma dimensión).
+
+#### Transpuesta
 ```{r}
 t(A)
 ```
 
-### Inversa
+#### Inversa
 ```{r}
 solve(B^2) #Elevamos B al cuadrado porque sino no era invertible
 ```
-### Multiplicación 
-Con el comando %*%.
+#### Multiplicación de matrices
+Para realizar la multiplicación de matrices convencional (al igual que en álgebra lineal), utilizamos el comando %*%.
 ```{r}
 B%*%A
 ```
+
 ### Seleccionar elementos de una matriz
-Usando [,] justo después de la matriz, donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.
+Al igual que con los vectores, seleccionamos elementos de una matriz usando [] justo después de la matriz. En este caso, se usa con una coma enmedio [,] donde el primer elemento indica el número de fila y el segundo el número de columna. Si, por ejemplo, el segundo elemento se deja en blanco, R tomará todas las columnas.
 ```{r}
 B[1,2]
 B[1:2,]
 ```
+
 ### Combinar elementos entre matrices 
 Se usa el comando *cbind* para unir columnas, y *rbind* para unir filas. Nótese que los argumentos deben tener la misma cantidad de renglones en el caso de *cbind*, y la misma cantidad de columnas en el caso de *rbind*. 
 ```{r}
 cbind(A,B)
 rbind(A,B[,1:2])
 ```
+
+## Data frames
+Un *data frame* o conjunto de datos presenta las variables del conjunto como columnas y las observaciones como filas. Son esencialmente lo mismo que las matrices, pero a diferencia de estas, un *data frame* puede almacenar distintos tipos de datos al mismo tiempo. 
+
+Puedes seleccionar y combinar distintos elementos de un *data frame* al igual que lo hicimos con las matrices, sólo que ahora hay una forma más sencilla de seleccionar una columna en particular: nombre_base$variable, i.e. colocando el signo de pesos "\$" justo entre el nombre de la base y en nombre de la variable (es más sencillo de lo que parece aquí). 
+
+Conviene siempre dar un primer vistazo al data frame con dos funciones: 
+
+* head(), que muestra las primeras seis renglones del data frame; y
+* str(), que nos dice de manera resumida las características de las variables de la base de datos. 
+
+Los ejemplos de *data frames* los dejamos para la sección de importar bases de datos, pues ésta es la forma en que R interpreta la mayoría de datos que utilizamos. 
+
+## Listas 
+Una lista en R es un objeto que puede almacenar distintos tipos de objetos al mismo tiempo, por ejemplo, matrices, vectores, *data frames*, etc. Es relevante conocer este tipo de objeto porque cosas como las regresiones o las bases de datos espaciales (para hacer mapas) son interpretadas como listas en R. 
+
+Puedes crear una lista con la función *list()*. Por poner un ejemplo: 
+```{r}
+mi_lista <- list(vector_numerico, A, c(a,b))
+```
+Nótese que la lista contiene tres objetos indicados entre paréntesis cuadrados dobles "[[]]", el primero es un vector numérico, el segundo un matriz y el tercero un vector de carateres. 
+
+Para seleccionar elementos de una lista primero debes indicar el objeto dentro de la lista con los [[]], y luego con un sólo [] el elemento deseado. Por ejemplo:
+```{r}
+mi_lista[[3]][1]
+```
+
+Por ahora no nos compliquemos con las listas, éstas creo que serán útiles, sobre todo, en temas un poco más avanzados como hacer mapas o extraer un elemento particular de una regresión. 
+
+## Funciones y paquetes
+Las funciones en R son las que van seguidas de paréntesis, ya hemos usados muchas de ellas en este punto. Cada función tiene sus propios argumentos (algunas ni tienen), unos los tienes que indicar obligatoriamente, y otros están definidos por default así que los puedes cambiar si es necesario. 
+
+Por ejemplo, la función *arg()* te dice los distintos argumentos que tiene otra función.
+```{r}
+args(matrix)
+```
+Hay dos formas de indicar los argumentos a una función de R: 
+
+1. Por nombre, i.e. indicando cada cosa (en el caso de matrix(data=x, nrow=y, etc.) ). 
+2. Por orden, i.e. si el primer argumento de la función son los datos, no hace falta indicar explícitamente *data*. 
+
+Siempre se recomienda ver la documentación de cada función antes de usarla para ver lo que tienes que indicarle, o bien para ver qué más puede hacer por ti. Para acceder a la documentación de una función puedes usar cualquiera de los siguientes caminos:
+```{r}
+# help(matrix)
+# ?matrix
+# Seleccionar la función y presionar F1
+```
+
+Si bien es sencillo crear tus propias funciones en R, la mayoría del tiempo recurrirás a funciones creadas por expertos en la programación de R, muchas de las cuales no vienen instaladas por default. Instalar paqueterías de 3ros es muy sencillo, sólo requiere de dos pasos: 
+
+1. Teclear en la consola la función *install.packages()*, indicando la paquetería entre comillas dentro del paréntesis y esperando a que termine; y 
+2. Cargar la paquetería con la función *library()*. 
+
+El primer paso sólo deberás hacerlo una vez en tu computadora, pero el segundo deberás hacerlo cada que inicies un nuevo espacio de trabajo. 
+
 # Importar bases de datos
 ## INEGI - BIE
 Una de las fuentes más comunes para descargar datos en México es el Banco de Información Económica ([BIE](https://www.inegi.org.mx/sistemas/bie/)) del INEGI. Básicamente todos los tipos de archivos de datos se leen de la misma forma, con ligeras variantes entre unos y otros, así que si dominas una forma será fácil leer otros tipos de archivos. 
 
-Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo cual no es útil para procesar los datos. 
+Para poner un ejemplo descargamos datos de 2005 a 2019 de inflación y desempleo en formato csv. Todas las bases descargadas de ahí tienen la misma estructura, la primera fila tiene el tipo de periodicidad, en este caso mensual, y la segunda fila el nombre de las variables, que es la ruta mediante la cual se obtuvo, lo que no es útil para procesar los datos. 
 
 Utilizamos la función *read.csv* para leer el archivo, el primer argumento contiene la ruta del archivo, usamos la opción *skip* para saltarnos las primeras dos filas del archivo, lo que combinamos con la opción *header = FALSE* para indicar que la primera fila del archivo no contiene los nombres de las variables, los cuales hemos determinado nosotros con la opción *col.names*. También hay que tener en cuenta que las bases descargadas del BIE suelen tener notas al final de los datos, si no las consideramos la base no se cargará de manera adecuada, lo cual podemos solucionar simplemente indicando el número máximo de renglones que queremos que lea, en este caso nuestro último renglón con datos es el 182, menos dos que quitamos al inicio, 180, lo cual indicamos con la opción *nrows*.
 
@@ -106,7 +288,7 @@ str(baseCP)
 
 Nótese que la variable Periodo no está en formato fecha, lo cual es un problema al momento de procesar la información, así que ahora veremos cómo convertirla al formato adecuado. Utilizaremos la libreria *lubridate* (que tienes que instalar previamente). Esta libreria tiene varias funciones cuya idea básica es indicarle en qué forma está escrita la fecha y el programa se encarga de convertirlo al formato adecuado. Para ver las funciones para otros formatos de fecha consulta la información de *lubridate*. 
 
-En este caso nuestra fecha tiene la forma de "y/m", es decir primero se indica el año y luego el mes, por lo que utilizaremos la función *ymd()*, añadiendo la opción *truncated=2* para indicarle que los dos últimos dígitos de la fecha, que corresponden al día, no aparecen en el nuestro formato. 
+En este caso nuestra fecha tiene la forma de "y/m", es decir primero se indica el año y luego el mes, por lo que utilizaremos la función *ymd()*, añadiendo la opción *truncated=2* para indicarle que los dos últimos dígitos de la fecha, que corresponden al día, no aparecen en nuestro formato. 
 
 ```{r}
 #library(lubridate)
@@ -152,7 +334,7 @@ IPC_anual <- aggregate(IPC_men, nfrequency = 1, mean)
 ```
 
 ## Tasas de crecimiento 
-Otro problema común es calcular tasas de crecimiento, esto lo hacemos fácilmente con un *mutate* y la función *lag()* de la libreria *dplyr*. A continuación un ejemplo con los índices de precios. Primero calculamos la inflación mensual, es decir la variación porcentual del índice de precios de un mes a otro, y luego la inflación anual, i.e. la variación porcentual del índice de precios de un mes a respecto al mismo mes del año pasado, esto se hace añadiendo la opción *n=* para indicarle cuántos periodos atrás considerar el rezago. 
+Otro problema común es calcular tasas de crecimiento, esto lo hacemos fácilmente con un *mutate* y la función *lag()* de la libreria *dplyr*. A continuación un ejemplo con los índices de precios. Primero calculamos la inflación mensual, es decir la variación porcentual del índice de precios de un mes a otro, y luego la inflación anual, i.e. la variación porcentual del índice de precios de un mes respecto al mismo mes del año pasado, esto se hace añadiendo la opción *n=* para indicarle cuántos periodos atrás considerar el rezago. 
 
 ```{r}
 baseCP <- baseCP %>% mutate(inf_mensual = ((Indice_inf/lag(Indice_inf))-1)*100,
@@ -164,7 +346,7 @@ head(baseCP[,-2], n=20)
 # Tablas
 Hay muchos paquetes para hacer tablas como *kable*, *kableExtra* y *stargazer*.
 
-## Kable
+## kable
 Casi todo salio de [aquí](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html). Para usar kable debes instalar primero la libreria *knitr*. Ahora un ejemplo con nuestra matriz **A**. 
 ```{r}
 kable(A, 
@@ -180,7 +362,7 @@ rownames(B) <- c("$\\alpha$","$\\beta$","$\\gamma$")
 kable(B, col.names = c("$\\eta$","$\\delta$","$\\iota$"))
 ```
 
-Hacer presentable una tabla como la de la sección pasada resulta muy sencillo, sólo tenemos que modificar una de las opciones por default de kable para que aparerzcan en blanco los NA.
+Hacer más o menos presentable una tabla como la de la sección pasada resulta muy sencillo, sólo tenemos que modificar una de las opciones por default de kable para que aparerzcan en blanco los NA.
 ```{r}
 #Para que aparerzcan en blanco los NA's.
 options(knitr.kable.NA = "")
@@ -194,7 +376,7 @@ kable(head(baseCP[,-2], n=20),
 
 La librería *kableExtra* (que debes instalar previamente) nos permite perzonalizar aún más las tablas de kable para que se vean más bonitas y añadir otras cosas como pie de página. Consulta [este sitio](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html) para que veas ejemplos de lo que se puede hacer. 
 
-Las cosas de kable se agregan con "pipes", %>%. Simplemente añadiendo *kable_styling()* hace que se vea más bonita, pero puedes agregar otras opciones como colores, niveles, etc. El pie de página se pone con la opción *footnote*, por default lo pone en dos niveles, lo que aparece después de *general_title* aparece el primer renglón y lo de *general* sale en el segundo, pero como prefiero que salga todo sólo en un renglón lo pongo como se ve enseguida. 
+Las cosas de kableExtra se agregan con "pipes", %>%. Simplemente añadiendo *kable_styling()* hace que se vea más bonita, pero puedes agregar otras opciones como colores, niveles, etc. El pie de página se pone con la opción *footnote*, por default lo pone en dos niveles, lo que aparece después de *general_title* aparece el primer renglón y lo de *general* sale en el segundo, pero como prefiero que salga todo sólo en un renglón lo pongo como se ve enseguida. 
 
 ```{r}
 kable(head(baseCP[,-2], n=20),
@@ -242,14 +424,8 @@ La libreria más usada para manipular bases de datos es *tidyverse*, aquí te mu
 * mutate, para crear nuevas variables con transformaciones de variables existentes; 
 * summarize, para contraer muchos valores en un solo resumen.
 
-Para ello normalmente requerirás de operadores lógicos: 
+Para ello normalmente requerirás de operadores lógicos mostrados al inicio, además de los siguientes: 
 
-* $>$, mayor que;
-* $>=$, mayor o igual que;
-* <, menor que; 
-* <=, menor o igual que; 
-* $!=, distinto de;
-* ==, igual a; 
 * &, es “y”; 
 * |, es “o”; 
 * !, es “no”.

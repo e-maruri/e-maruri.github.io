@@ -4,13 +4,14 @@ output:
   html_document:
     toc: true
     toc_depth: 3
+    toc_float: true
+    theme: lumen
 header:
   - \usepackage{amsmath}
   - \usepackage[spanish]{babel}
   - \selectlanguage{spanish}
 ---
-\renewcommand{\tablename}{Tabla} 
----
+
 ```{r, echo=FALSE}
 pacman::p_load(tidyverse, 
                stargazer,
@@ -110,20 +111,10 @@ D <- cbind(arrange(B, Ing_prom),arrange(C,Ing_prom)[,2])
 
 kable(D, col.names = c("Decil", "Ingreso promedio s.f.", "Ingreso promedio c.f."), 
       caption = "Deciles de ingreso", format.args = list(big.mark = ","), digits = 0) %>%
-  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "") 
 ```
 
 ## Percentiles de ingreso 
 Ahora lo mismo pero con percentiles, es decir, cada 1%. 
 
-```{r}
-percentiles <- seq(0.01, 1, 0.01)
-# Percentiles con factor
-percentiles_ingreso <- wtd.quantile(ENIGH$ing_cor, percentiles, weight = ENIGH$factor)
-
-ENIGH3 <- subset.data.frame(ENIGH, select = c("factor", "ing_cor"))
-ENIGH3 <- ENIGH3 %>% mutate(Percentil = "")
-
-# Percentiles con factor
-
-```
