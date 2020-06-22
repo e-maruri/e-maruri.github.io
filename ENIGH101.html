@@ -391,6 +391,8 @@ div.tocify {
 
 <div id="qué-es-y-para-qué-sirve" class="section level1">
 <h1>¿Qué es y para qué sirve?</h1>
+<p>La Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) es una encuesta que se publica cada dos años. Su objetivo es proporcionar un panorama estadístico del comportamiento de los ingresos y gastos de los hogares en cuanto a su monto, procedencia y distribución; adicionalmente, ofrece información sobre las características ocupacionales y sociodemográficas de los integrantes del hogar, así como las características de la infraestructura de la vivienda y el equipamiento del hogar.</p>
+<p>Uno de sus principales usos es el que le da el Coneval, pues a partir de la ENIGH se realizan las mediciones de pobreza multidimensional. Si quieres ver cómo hace el Coneval los cálculos en R (y otros programas estadísticos) puedes consultarlos <a href="https://www.coneval.org.mx/Medicion/MP/Paginas/Programas_BD_08_10_12_14_16_18.aspx">aquí</a>.</p>
 </div>
 <div id="cómo-descargarla" class="section level1">
 <h1>¿Cómo descargarla?</h1>
@@ -1771,12 +1773,9 @@ Gini con factor de expansión
 </tfoot>
 </table>
 <pre class="r"><code>ENIGH_10_alto &lt;- ENIGH %&gt;% filter(Decil_cf==&quot;X&quot;)
-gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor)</code></pre>
-<pre><code>## [1] 0.2701702</code></pre>
-<pre class="r"><code>ENIGH_100_alto &lt;- ENIGH %&gt;% filter(Percentil==100)
-gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)</code></pre>
-<pre><code>## [1] 0.2954872</code></pre>
-<pre class="r"><code>kable(cbind(gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor), 
+ENIGH_100_alto &lt;- ENIGH %&gt;% filter(Percentil==100)
+
+kable(cbind(gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor), 
             gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)),
       col.names = c(&quot;Gini del 10% más rico&quot;, &quot;Gini del 1% más rico&quot;), 
       caption = &quot;México, coeficientes de gini de mercado, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 3) %&gt;%
