@@ -385,7 +385,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">R mínimo para economistas</h1>
-<h4 class="date">13 de junio del 2020</h4>
+<h4 class="date">21 de junio del 2020</h4>
 
 </div>
 
@@ -5131,18 +5131,12 @@ Inflación anual
 <h1>Trabajar bases de datos</h1>
 <p>La libreria más usada para manipular bases de datos es <em>tidyverse</em>, aquí te muestro sus funciones básicas. Se compone de cinco verbos principales:</p>
 <ul>
-<li>arrange, para reordenar las filas;</li>
-<li>filter, para filtrar o elegir las observaciones por sus valores;</li>
-<li>select, para seleccionar las variables;</li>
-<li>mutate, para crear nuevas variables con transformaciones de variables existentes;</li>
-<li>summarize, para contraer muchos valores en un solo resumen.</li>
+<li><em>select</em>, para seleccionar un subonjuto de variables de tu <em>data frame</em>;</li>
+<li><em>arrange</em>, para reordenar las filas según los valores del alguna variable;</li>
+<li><em>filter</em>, para filtrar o elegir las observaciones según algún criterio;</li>
+<li><em>mutate</em>, para crear nuevas variables (o modifcar las existentes).</li>
 </ul>
-<p>Para ello normalmente requerirás de operadores lógicos mostrados al inicio, además de los siguientes:</p>
-<ul>
-<li>&amp;, es “y”;</li>
-<li>|, es “o”;</li>
-<li>!, es “no”.</li>
-</ul>
+<p>Otros verbos de <em>tidyverse</em> que resultan muy útiles son <em>group_by</em> y <em>summarize</em>. El primero sirve para agrupar las observaciones según algún criterio o variable, y el segundo para crear una variable que resuma las observaciones según el grupo.</p>
 </div>
 <div id="gráficas" class="section level1">
 <h1>Gráficas</h1>

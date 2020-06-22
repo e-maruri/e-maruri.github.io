@@ -17,7 +17,6 @@ pacman::p_load(tidyverse,
                stargazer,
                knitr,
                kableExtra,
-               MASS,
                reldist)
 options(knitr.table.format = "html")
 rm(list = ls())
@@ -34,12 +33,11 @@ Aquí usaré la versión de 2018 en formato .csv, la más reciente a la fecha, l
 ```{r, cache=TRUE}
 ENIGH <- read.csv("https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv")
 
-# Para quedaronos sólo con las que utilizaremos 
-#ENIGH1 <- subset.data.frame(ENIGH, select = c("ï..folioviv", "foliohog", "ing_cor", "ingtrab", "trabajo", "negocio", "otros_trab", "rentas", "utilidad", "arrenda", "transfer", "jubilacion", "becas", "donativos", "remesas", "bene_gob", "transf_hog", "trans_inst", "estim_alqu", "otros_ing","factor","upm","est_dis"))
+#ENIGH <- read.csv("ENIGH_concentradohogar_2018.csv")
 ```
 
 # Resultados básicos
-Uno de los elementos más importantes de la ENIGH es el factor de expansión, llamado *factor* en la base de datos, pues cada observación representa a otras viviendas y personas de condiciones socioeconómicas similares, por lo que el factor de expansión constituye el peso que se le da a cada unidad muestral para  generalizar los resultados de la muestra a la población. 
+Uno de los elementos más importantes de la ENIGH es el factor de expansión, llamado *factor* en la base de datos, pues cada observación representa a otras viviendas y personas de condiciones socioeconómicas similares, por lo que el factor de expansión constituye el peso que se le da a cada unidad muestral para  generalizar los resultados de la muestra a la población.
 
 Veamos un ejemplo de su importancia. La siguiente tablita muestra que la suma de la columna factor representa el número total de hogares, que al multiplicar cada una por el número total de integrantes de cada hogar nos da la población total. Se observa que cuando no consideramos el factor de expansión el ingreso corriente promedio trimestral es de poco más de 46 mil pesos, pero cuando sí consideramos el factor es 49.6 mil pesos, que es justo el que reporta el INEGI (como puede verse [aquí](https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh2018_ns_presentacion_resultados.pdf)).
 
@@ -52,11 +50,20 @@ A <- data.frame(matrix(c(a,b,c,d), ncol = 1))
 row.names(A) <- c("Hogares", "Habitantes", "Ingreso corriente s.f.", "Ingreso corriente c.f.")
 kable(A, col.names = c("Cantidad"), 
       caption = "Primer resumen ENIGH", format.args = list(big.mark = ","), digits = 0) %>%
-  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+  kable_styling(full_width = F, bootstrap_options = "striped") %>% 
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "", 
+           symbol = c("s.f.: sin factor de expansión","c.f.: con factor de expansión"), 
+           footnote_order = c("symbol", "general") )
 ```
 
 ## Deciles de ingreso 
-Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso. 
+Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso. Una vez más mostraremos cómo cambian los resultados cuando consideramos no consideramos el factor de expansión. 
+
+Primero una secuencia del 0.1 al 1 con incrementos de 0.1 con la función *seq()*, y luego creamos los deciles de ingreso con la función *quantile()*. Luego hacemos lo mismo con la función *wtd.quantile()* de la libreria *reldist* (que debes instalar previamente). 
+
+Lo que muestra la siguiente tabla es el límite superior de cada decil, es decir, sin considerar el factor de expansión, un hogar que tiene un ingreso corriente trimestral por debajo de 12,498 pesos (aprox. 4200 al mes) se considera del 10% más pobre del país por ingresos. En el otro extremo un hogar con un ingreso corriente trimestral por encima de 88,006 pesos (aprox. 29300 al mes) se considera del 10% más rico por ingresos del país. 
+
+Considerando el factor de expansión estas cifras cambian, y el cambio es mayor cuanto más subimos en la distribución del ingreso. Un hogar cuyo ingreso corriente trimestral sea mayor a 94,617 pesos (aprox. 31500 al mes) se considera del 10% más rico por ingresos del país. 
 
 ```{r}
 deciles <- seq(0.1, 1, 0.1)
@@ -67,11 +74,19 @@ deciles_ingreso <- quantile(ENIGH$ing_cor, deciles)
 #utilizamos la función "wtd.quantile" de la libreria "reldist"
 deciles_ingreso2 <- wtd.quantile(ENIGH$ing_cor, deciles, weight = ENIGH$factor)
 
-#Comparación 
-#kable(list(deciles_ingreso, deciles_ingreso2))
+#Comparación entre deciles 
+kable(cbind(deciles_ingreso, deciles_ingreso2), 
+      col.names = c("Sin factor de expansión", "Con factor de expansión"), 
+      caption = "Deciles de ingreso, 2018", format.args = list(big.mark = ","), digits = 0) %>% 
+  kable_styling(full_width = F, bootstrap_options = "striped") %>% 
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+```
 
+Ahora calculamos el ingreso promedio trimestral de cada decil, que es lo que comunmente publica el INEGI respecto a los deciles de ingreso. 
+
+```{r}
 #Deciles sin factor
-ENIGH1 <- ENIGH %>% mutate(Decil = case_when(
+ENIGH <- ENIGH %>% mutate(Decil_sf = case_when(
   ing_cor <= deciles_ingreso[1] ~ "I", 
   ing_cor <= deciles_ingreso[2] ~ "II",
   ing_cor <= deciles_ingreso[3] ~ "III",
@@ -84,12 +99,12 @@ ENIGH1 <- ENIGH %>% mutate(Decil = case_when(
   TRUE ~ "X"
 )
 )
-B <- ENIGH1 %>% group_by(Decil) %>% summarize(weighted.mean(ing_cor, factor)) 
-colnames(B) <- c("Decil", "Ing_prom")
-B <- as.data.frame(B)
+B <- ENIGH %>% group_by(Decil_sf) %>% 
+  summarize(Ing_prom=weighted.mean(ing_cor, factor)) %>% 
+  arrange(Ing_prom)
 
 #Deciles con factor
-ENIGH2 <- ENIGH %>% mutate(Decil = case_when(
+ENIGH <- ENIGH %>% mutate(Decil_cf = case_when(
   ing_cor <= deciles_ingreso2[1] ~ "I", 
   ing_cor <= deciles_ingreso2[2] ~ "II",
   ing_cor <= deciles_ingreso2[3] ~ "III",
@@ -103,18 +118,102 @@ ENIGH2 <- ENIGH %>% mutate(Decil = case_when(
 )
 )
 
-C <- ENIGH2 %>% group_by(Decil) %>% summarize(weighted.mean(ing_cor, factor)) 
-colnames(C) <- c("Decil", "Ing_prom")
-C <- as.data.frame(C)
+C <- ENIGH %>% group_by(Decil_cf) %>% 
+  summarize(Ing_prom = weighted.mean(ing_cor, factor)) %>% 
+  arrange(Ing_prom)
 
-D <- cbind(arrange(B, Ing_prom),arrange(C,Ing_prom)[,2])
-
-kable(D, col.names = c("Decil", "Ingreso promedio s.f.", "Ingreso promedio c.f."), 
-      caption = "Deciles de ingreso", format.args = list(big.mark = ","), digits = 0) %>%
+kable(cbind(B,C[,2]), col.names = c("Decil", "Sin factor de expansión", "Con factor de expansión"), 
+      caption = "Ingreso pormedio por decil, 2018", format.args = list(big.mark = ","), digits = 0) %>%
   kable_styling(full_width = F, bootstrap_options = "striped") %>%
-  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "") 
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
 ```
 
 ## Percentiles de ingreso 
 Ahora lo mismo pero con percentiles, es decir, cada 1%. 
+```{r}
+percentiles <- seq(0, 1, 0.01)
+percentiles_ingreso <- wtd.quantile(ENIGH$ing_cor, percentiles, weight = ENIGH$factor)
+
+ENIGH <- ENIGH %>% mutate(Percentil = 0)
+
+for(i in 1:nrow(ENIGH)){ 
+  for(j in 1:101){ 
+    if( percentiles_ingreso[j] <= ENIGH$ing_cor[i] &
+                        ENIGH$ing_cor[i] <= percentiles_ingreso[j+1] ){
+      ENIGH$Percentil[i] = j
+      break } 
+  }
+} 
+D <- ENIGH %>% group_by(Percentil) %>% 
+  summarize(Ing_prom = weighted.mean(ing_cor, factor)) %>% 
+  arrange(Ing_prom)
+
+kable(cbind(D[1:25,], D[26:50,], D[51:75,], D[76:100,]),  
+      col.names = c("Percentil","Ingreso promedio","Percentil","Ingreso promedio",
+                    "Percentil", "Ingreso promedio","Percentil", "Ingreso promedio"),
+      caption = "Ingreso promedio por percentil, 2018", format.args = list(big.mark = ","), digits = 0) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+```
+
+## Curva de Lorenz y coeficiente de Gini
+La medida más común de desigualdad es el ínidice de Gini, el cual está estrechamente relacionado con la curva de Lorenz. La curva de Lorenz es una gráfica que describe cómo varía la distribución del ingreso de una población respecto a una distribución perfectamente igualitaria. El porcentaje de receptores de ingresos (o bien los deciles) se representa en el eje horizontal, no en términos absolutos, sino en porcentajes acumulativos, mientras que el eje vertical muestra la proporción del ingreso total recibido por cada porcentaje de la población (también en forma acumulada). La información para crear la curva de Lorenz se describe en la siguiente tabla. 
+
+```{r}
+E <- ENIGH %>% group_by(Decil_cf) %>%
+  summarize(Ing_tot_dec = sum(ing_cor)) %>%
+  arrange(Ing_tot_dec) %>%
+  mutate(Pop_dec_ing_tot = Ing_tot_dec/sum(Ing_tot_dec)*100)
+
+kable(E, col.names = c("Decil", "Ingreso total del decil", "Porcentaje del ingreso total"), 
+      caption = "Ingreso corriente agregado por decil, 2018", format.args = list(big.mark = ","), digits = 2) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+```
+
+Una vez que se construye la tabla anterior, es sencillo generar la curva de Lorenz. En ella se observa que el 50% de la población de menores ingresos recibe aproximadamente el 25% del ingreso total, menos del 30% que se queda sólo el 10% más rico de la población. 
+
+```{r}
+E$Decil_cf <- 1:10
+rbind(0,E) %>% arrange(Ing_tot_dec) %>% 
+  ggplot(aes(x=Decil_cf, y=cumsum(Pop_dec_ing_tot), group = 1)) + 
+  geom_line() + geom_point() + 
+  geom_abline(intercept = 0, slope = 10) + 
+  coord_cartesian(c(0,10),c(0,100), expand = F) +
+  scale_x_continuous(breaks = seq(0,10,1), limits = c(0,10)) +
+  scale_y_continuous(breaks = seq(0,100,10), limits = c(0,100)) +
+  labs(x = "Decil de ingreso", y = "Porcentaje de ingreso", 
+       title = "México: curva de Lorenz, 2018", 
+       caption = "Fuente: elaboración propia con datos de la ENIGH, INEGI") +
+  theme_bw()
+```
+
+Como ya bien sabes, el **índice de Gini** es una medida numérica agregada de la desigualdad del ingreso que varía de 0 (igualdad perfecta) a 1 (desigualdad perfecta). Se mide gráficamente dividiendo el área entre la línea de igualdad perfecta y la curva de Lorenz entre el área total del triángulo que se forma a la derecha de la línea de igualdad en el diagrama de Lorenz. Cuanto mayor es el valor del coeficiente, mayor es la desigualdad en la distribución del ingreso; cuanto menor es, más equitativa es la distribución del ingreso.
+
+La libreria *reldist* (que usamos para generar los deciles y los percentiles incorporando el factor de expansión) contiene una función que permite calcular el índice de Gini de manera sencilla (tal cual, la función se llama *gini()*). A continuación calculamos el índice de gini con y sin factor de expansión con el fin de resaltar una vez más la importancia de tomarlo en cuenta. 
+
+```{r}
+gini_sf <- gini(ENIGH$ing_cor)
+gini_cf <- gini(ENIGH$ing_cor, weights = ENIGH$factor)
+
+kable(cbind(gini_sf, gini_cf), col.names = c("Gini sin factor de expansión", "Gini con factor de expansión"), 
+      caption = "México, coeficiente de gini de mercado, 2018", format.args = list(big.mark = ","), digits = 3) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+```
+
+```{r}
+ENIGH_10_alto <- ENIGH %>% filter(Decil_cf=="X")
+gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor)
+ENIGH_100_alto <- ENIGH %>% filter(Percentil==100)
+gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)
+
+kable(cbind(gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor), 
+            gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)),
+      col.names = c("Gini del 10% más rico", "Gini del 1% más rico"), 
+      caption = "México, coeficientes de gini de mercado, 2018", format.args = list(big.mark = ","), digits = 3) %>%
+  kable_styling(full_width = F, bootstrap_options = "striped") %>%
+  footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
+
+```
 

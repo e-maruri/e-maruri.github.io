@@ -398,8 +398,7 @@ div.tocify {
 <p>Aquí usaré la versión de 2018 en formato .csv, la más reciente a la fecha, la cual he subido a mi sitio de github para que sea más fácil replicar todo.</p>
 <pre class="r"><code>ENIGH &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv&quot;)
 
-# Para quedaronos sólo con las que utilizaremos 
-#ENIGH1 &lt;- subset.data.frame(ENIGH, select = c(&quot;ï..folioviv&quot;, &quot;foliohog&quot;, &quot;ing_cor&quot;, &quot;ingtrab&quot;, &quot;trabajo&quot;, &quot;negocio&quot;, &quot;otros_trab&quot;, &quot;rentas&quot;, &quot;utilidad&quot;, &quot;arrenda&quot;, &quot;transfer&quot;, &quot;jubilacion&quot;, &quot;becas&quot;, &quot;donativos&quot;, &quot;remesas&quot;, &quot;bene_gob&quot;, &quot;transf_hog&quot;, &quot;trans_inst&quot;, &quot;estim_alqu&quot;, &quot;otros_ing&quot;,&quot;factor&quot;,&quot;upm&quot;,&quot;est_dis&quot;))</code></pre>
+#ENIGH &lt;- read.csv(&quot;ENIGH_concentradohogar_2018.csv&quot;)</code></pre>
 </div>
 <div id="resultados-básicos" class="section level1">
 <h1>Resultados básicos</h1>
@@ -413,8 +412,11 @@ A &lt;- data.frame(matrix(c(a,b,c,d), ncol = 1))
 row.names(A) &lt;- c(&quot;Hogares&quot;, &quot;Habitantes&quot;, &quot;Ingreso corriente s.f.&quot;, &quot;Ingreso corriente c.f.&quot;)
 kable(A, col.names = c(&quot;Cantidad&quot;), 
       caption = &quot;Primer resumen ENIGH&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
-  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
-<table>
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;% 
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;, 
+           symbol = c(&quot;s.f.: sin factor de expansión&quot;,&quot;c.f.: con factor de expansión&quot;), 
+           footnote_order = c(&quot;symbol&quot;, &quot;general&quot;) )</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Primer resumen ENIGH
 </caption>
@@ -464,6 +466,16 @@ Ingreso corriente c.f.
 <tfoot>
 <tr>
 <td style="padding: 0; border: 0;" colspan="100%">
+<sup>*</sup> s.f.: sin factor de expansión
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup>†</sup> c.f.: con factor de expansión
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
 <span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
 </td>
 </tr>
@@ -476,7 +488,10 @@ Ingreso corriente c.f.
 </table>
 <div id="deciles-de-ingreso" class="section level2">
 <h2>Deciles de ingreso</h2>
-<p>Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso.</p>
+<p>Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso. Una vez más mostraremos cómo cambian los resultados cuando consideramos no consideramos el factor de expansión.</p>
+<p>Primero una secuencia del 0.1 al 1 con incrementos de 0.1 con la función <em>seq()</em>, y luego creamos los deciles de ingreso con la función <em>quantile()</em>. Luego hacemos lo mismo con la función <em>wtd.quantile()</em> de la libreria <em>reldist</em> (que debes instalar previamente).</p>
+<p>Lo que muestra la siguiente tabla es el límite superior de cada decil, es decir, sin considerar el factor de expansión, un hogar que tiene un ingreso corriente trimestral por debajo de 12,498 pesos (aprox. 4200 al mes) se considera del 10% más pobre del país por ingresos. En el otro extremo un hogar con un ingreso corriente trimestral por encima de 88,006 pesos (aprox. 29300 al mes) se considera del 10% más rico por ingresos del país.</p>
+<p>Considerando el factor de expansión estas cifras cambian, y el cambio es mayor cuanto más subimos en la distribución del ingreso. Un hogar cuyo ingreso corriente trimestral sea mayor a 94,617 pesos (aprox. 31500 al mes) se considera del 10% más rico por ingresos del país.</p>
 <pre class="r"><code>deciles &lt;- seq(0.1, 1, 0.1)
 #Deciles sin factor
 deciles_ingreso &lt;- quantile(ENIGH$ing_cor, deciles)
@@ -485,11 +500,156 @@ deciles_ingreso &lt;- quantile(ENIGH$ing_cor, deciles)
 #utilizamos la función &quot;wtd.quantile&quot; de la libreria &quot;reldist&quot;
 deciles_ingreso2 &lt;- wtd.quantile(ENIGH$ing_cor, deciles, weight = ENIGH$factor)
 
-#Comparación 
-#kable(list(deciles_ingreso, deciles_ingreso2))
-
-#Deciles sin factor
-ENIGH1 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
+#Comparación entre deciles 
+kable(cbind(deciles_ingreso, deciles_ingreso2), 
+      col.names = c(&quot;Sin factor de expansión&quot;, &quot;Con factor de expansión&quot;), 
+      caption = &quot;Deciles de ingreso, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;% 
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;% 
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Deciles de ingreso, 2018
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Sin factor de expansión
+</th>
+<th style="text-align:right;">
+Con factor de expansión
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+10%
+</td>
+<td style="text-align:right;">
+12,498
+</td>
+<td style="text-align:right;">
+13,156
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+20%
+</td>
+<td style="text-align:right;">
+17,892
+</td>
+<td style="text-align:right;">
+18,896
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+30%
+</td>
+<td style="text-align:right;">
+22,801
+</td>
+<td style="text-align:right;">
+24,042
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+40%
+</td>
+<td style="text-align:right;">
+27,845
+</td>
+<td style="text-align:right;">
+29,359
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+50%
+</td>
+<td style="text-align:right;">
+33,573
+</td>
+<td style="text-align:right;">
+35,506
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+60%
+</td>
+<td style="text-align:right;">
+40,456
+</td>
+<td style="text-align:right;">
+42,696
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+70%
+</td>
+<td style="text-align:right;">
+49,504
+</td>
+<td style="text-align:right;">
+52,428
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+80%
+</td>
+<td style="text-align:right;">
+62,567
+</td>
+<td style="text-align:right;">
+66,594
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+90%
+</td>
+<td style="text-align:right;">
+88,006
+</td>
+<td style="text-align:right;">
+94,617
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+100%
+</td>
+<td style="text-align:right;">
+4,501,830
+</td>
+<td style="text-align:right;">
+4,501,830
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+<p>Ahora calculamos el ingreso promedio trimestral de cada decil, que es lo que comunmente publica el INEGI respecto a los deciles de ingreso.</p>
+<pre class="r"><code>#Deciles sin factor
+ENIGH &lt;- ENIGH %&gt;% mutate(Decil_sf = case_when(
   ing_cor &lt;= deciles_ingreso[1] ~ &quot;I&quot;, 
   ing_cor &lt;= deciles_ingreso[2] ~ &quot;II&quot;,
   ing_cor &lt;= deciles_ingreso[3] ~ &quot;III&quot;,
@@ -502,12 +662,12 @@ ENIGH1 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
   TRUE ~ &quot;X&quot;
 )
 )
-B &lt;- ENIGH1 %&gt;% group_by(Decil) %&gt;% summarize(weighted.mean(ing_cor, factor)) 
-colnames(B) &lt;- c(&quot;Decil&quot;, &quot;Ing_prom&quot;)
-B &lt;- as.data.frame(B)
+B &lt;- ENIGH %&gt;% group_by(Decil_sf) %&gt;% 
+  summarize(Ing_prom=weighted.mean(ing_cor, factor)) %&gt;% 
+  arrange(Ing_prom)
 
 #Deciles con factor
-ENIGH2 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
+ENIGH &lt;- ENIGH %&gt;% mutate(Decil_cf = case_when(
   ing_cor &lt;= deciles_ingreso2[1] ~ &quot;I&quot;, 
   ing_cor &lt;= deciles_ingreso2[2] ~ &quot;II&quot;,
   ing_cor &lt;= deciles_ingreso2[3] ~ &quot;III&quot;,
@@ -521,19 +681,17 @@ ENIGH2 &lt;- ENIGH %&gt;% mutate(Decil = case_when(
 )
 )
 
-C &lt;- ENIGH2 %&gt;% group_by(Decil) %&gt;% summarize(weighted.mean(ing_cor, factor)) 
-colnames(C) &lt;- c(&quot;Decil&quot;, &quot;Ing_prom&quot;)
-C &lt;- as.data.frame(C)
+C &lt;- ENIGH %&gt;% group_by(Decil_cf) %&gt;% 
+  summarize(Ing_prom = weighted.mean(ing_cor, factor)) %&gt;% 
+  arrange(Ing_prom)
 
-D &lt;- cbind(arrange(B, Ing_prom),arrange(C,Ing_prom)[,2])
-
-kable(D, col.names = c(&quot;Decil&quot;, &quot;Ingreso promedio s.f.&quot;, &quot;Ingreso promedio c.f.&quot;), 
-      caption = &quot;Deciles de ingreso&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
+kable(cbind(B,C[,2]), col.names = c(&quot;Decil&quot;, &quot;Sin factor de expansión&quot;, &quot;Con factor de expansión&quot;), 
+      caption = &quot;Ingreso pormedio por decil, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
   kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
-  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;) </code></pre>
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
 <table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Deciles de ingreso
+Ingreso pormedio por decil, 2018
 </caption>
 <thead>
 <tr>
@@ -541,10 +699,10 @@ Deciles de ingreso
 Decil
 </th>
 <th style="text-align:right;">
-Ingreso promedio s.f.
+Sin factor de expansión
 </th>
 <th style="text-align:right;">
-Ingreso promedio c.f.
+Con factor de expansión
 </th>
 </tr>
 </thead>
@@ -677,6 +835,990 @@ X
 <div id="percentiles-de-ingreso" class="section level2">
 <h2>Percentiles de ingreso</h2>
 <p>Ahora lo mismo pero con percentiles, es decir, cada 1%.</p>
+<pre class="r"><code>percentiles &lt;- seq(0, 1, 0.01)
+percentiles_ingreso &lt;- wtd.quantile(ENIGH$ing_cor, percentiles, weight = ENIGH$factor)
+
+ENIGH &lt;- ENIGH %&gt;% mutate(Percentil = 0)
+
+for(i in 1:nrow(ENIGH)){ 
+  for(j in 1:101){ 
+    if( percentiles_ingreso[j] &lt;= ENIGH$ing_cor[i] &amp;
+                        ENIGH$ing_cor[i] &lt;= percentiles_ingreso[j+1] ){
+      ENIGH$Percentil[i] = j
+      break } 
+  }
+} 
+D &lt;- ENIGH %&gt;% group_by(Percentil) %&gt;% 
+  summarize(Ing_prom = weighted.mean(ing_cor, factor)) %&gt;% 
+  arrange(Ing_prom)
+
+kable(cbind(D[1:25,], D[26:50,], D[51:75,], D[76:100,]),  
+      col.names = c(&quot;Percentil&quot;,&quot;Ingreso promedio&quot;,&quot;Percentil&quot;,&quot;Ingreso promedio&quot;,
+                    &quot;Percentil&quot;, &quot;Ingreso promedio&quot;,&quot;Percentil&quot;, &quot;Ingreso promedio&quot;),
+      caption = &quot;Ingreso promedio por percentil, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Ingreso promedio por percentil, 2018
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Percentil
+</th>
+<th style="text-align:right;">
+Ingreso promedio
+</th>
+<th style="text-align:right;">
+Percentil
+</th>
+<th style="text-align:right;">
+Ingreso promedio
+</th>
+<th style="text-align:right;">
+Percentil
+</th>
+<th style="text-align:right;">
+Ingreso promedio
+</th>
+<th style="text-align:right;">
+Percentil
+</th>
+<th style="text-align:right;">
+Ingreso promedio
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3,883
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+21,653
+</td>
+<td style="text-align:right;">
+51
+</td>
+<td style="text-align:right;">
+35,819
+</td>
+<td style="text-align:right;">
+76
+</td>
+<td style="text-align:right;">
+59,347
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5,870
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+22,183
+</td>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+36,448
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+60,740
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+7,065
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+22,747
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+37,127
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+62,248
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+8,105
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+23,296
+</td>
+<td style="text-align:right;">
+54
+</td>
+<td style="text-align:right;">
+37,850
+</td>
+<td style="text-align:right;">
+79
+</td>
+<td style="text-align:right;">
+63,976
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+9,036
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+23,805
+</td>
+<td style="text-align:right;">
+55
+</td>
+<td style="text-align:right;">
+38,556
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+65,690
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+9,953
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+24,309
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+39,280
+</td>
+<td style="text-align:right;">
+81
+</td>
+<td style="text-align:right;">
+67,483
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10,741
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+24,827
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+39,979
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+69,279
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+11,501
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+25,380
+</td>
+<td style="text-align:right;">
+58
+</td>
+<td style="text-align:right;">
+40,700
+</td>
+<td style="text-align:right;">
+83
+</td>
+<td style="text-align:right;">
+71,372
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+12,181
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+25,913
+</td>
+<td style="text-align:right;">
+59
+</td>
+<td style="text-align:right;">
+41,516
+</td>
+<td style="text-align:right;">
+84
+</td>
+<td style="text-align:right;">
+73,649
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+12,818
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+26,438
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+42,311
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+76,394
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+13,468
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+26,949
+</td>
+<td style="text-align:right;">
+61
+</td>
+<td style="text-align:right;">
+43,107
+</td>
+<td style="text-align:right;">
+86
+</td>
+<td style="text-align:right;">
+79,171
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+14,107
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+27,466
+</td>
+<td style="text-align:right;">
+62
+</td>
+<td style="text-align:right;">
+43,950
+</td>
+<td style="text-align:right;">
+87
+</td>
+<td style="text-align:right;">
+82,101
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+14,699
+</td>
+<td style="text-align:right;">
+38
+</td>
+<td style="text-align:right;">
+28,017
+</td>
+<td style="text-align:right;">
+63
+</td>
+<td style="text-align:right;">
+44,765
+</td>
+<td style="text-align:right;">
+88
+</td>
+<td style="text-align:right;">
+85,317
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+15,256
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:right;">
+28,554
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+45,720
+</td>
+<td style="text-align:right;">
+89
+</td>
+<td style="text-align:right;">
+88,625
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+15,817
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+29,115
+</td>
+<td style="text-align:right;">
+65
+</td>
+<td style="text-align:right;">
+46,669
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+92,560
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+16,404
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+29,621
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+47,615
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+97,062
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+16,983
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+30,174
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+48,623
+</td>
+<td style="text-align:right;">
+92
+</td>
+<td style="text-align:right;">
+102,256
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+17,548
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+30,763
+</td>
+<td style="text-align:right;">
+68
+</td>
+<td style="text-align:right;">
+49,669
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+108,052
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+18,081
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+31,357
+</td>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+50,728
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+115,565
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+18,640
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+31,954
+</td>
+<td style="text-align:right;">
+70
+</td>
+<td style="text-align:right;">
+51,814
+</td>
+<td style="text-align:right;">
+95
+</td>
+<td style="text-align:right;">
+124,973
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+19,133
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+32,570
+</td>
+<td style="text-align:right;">
+71
+</td>
+<td style="text-align:right;">
+52,974
+</td>
+<td style="text-align:right;">
+96
+</td>
+<td style="text-align:right;">
+136,978
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+19,586
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+33,171
+</td>
+<td style="text-align:right;">
+72
+</td>
+<td style="text-align:right;">
+54,070
+</td>
+<td style="text-align:right;">
+97
+</td>
+<td style="text-align:right;">
+152,115
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+20,131
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+33,854
+</td>
+<td style="text-align:right;">
+73
+</td>
+<td style="text-align:right;">
+55,319
+</td>
+<td style="text-align:right;">
+98
+</td>
+<td style="text-align:right;">
+173,264
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+20,629
+</td>
+<td style="text-align:right;">
+49
+</td>
+<td style="text-align:right;">
+34,537
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:right;">
+56,578
+</td>
+<td style="text-align:right;">
+99
+</td>
+<td style="text-align:right;">
+212,938
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+21,126
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+35,188
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+57,930
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+445,345
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div id="curva-de-lorenz-y-coeficiente-de-gini" class="section level2">
+<h2>Curva de Lorenz y coeficiente de Gini</h2>
+<p>La medida más común de desigualdad es el ínidice de Gini, el cual está estrechamente relacionado con la curva de Lorenz. La curva de Lorenz es una gráfica que describe cómo varía la distribución del ingreso de una población respecto a una distribución perfectamente igualitaria. El porcentaje de receptores de ingresos (o bien los deciles) se representa en el eje horizontal, no en términos absolutos, sino en porcentajes acumulativos, mientras que el eje vertical muestra la proporción del ingreso total recibido por cada porcentaje de la población (también en forma acumulada). La información para crear la curva de Lorenz se describe en la siguiente tabla.</p>
+<pre class="r"><code>E &lt;- ENIGH %&gt;% group_by(Decil_cf) %&gt;%
+  summarize(Ing_tot_dec = sum(ing_cor)) %&gt;%
+  arrange(Ing_tot_dec) %&gt;%
+  mutate(Pop_dec_ing_tot = Ing_tot_dec/sum(Ing_tot_dec)*100)
+
+kable(E, col.names = c(&quot;Decil&quot;, &quot;Ingreso total del decil&quot;, &quot;Porcentaje del ingreso total&quot;), 
+      caption = &quot;Ingreso corriente agregado por decil, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 2) %&gt;%
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+Ingreso corriente agregado por decil, 2018
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Decil
+</th>
+<th style="text-align:right;">
+Ingreso total del decil
+</th>
+<th style="text-align:right;">
+Porcentaje del ingreso total
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+I
+</td>
+<td style="text-align:right;">
+75,526,189
+</td>
+<td style="text-align:right;">
+2.20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+II
+</td>
+<td style="text-align:right;">
+130,800,500
+</td>
+<td style="text-align:right;">
+3.81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+III
+</td>
+<td style="text-align:right;">
+168,358,828
+</td>
+<td style="text-align:right;">
+4.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IV
+</td>
+<td style="text-align:right;">
+205,030,537
+</td>
+<td style="text-align:right;">
+5.97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+V
+</td>
+<td style="text-align:right;">
+244,804,789
+</td>
+<td style="text-align:right;">
+7.12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VI
+</td>
+<td style="text-align:right;">
+285,483,666
+</td>
+<td style="text-align:right;">
+8.31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VII
+</td>
+<td style="text-align:right;">
+350,899,371
+</td>
+<td style="text-align:right;">
+10.21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VIII
+</td>
+<td style="text-align:right;">
+415,883,703
+</td>
+<td style="text-align:right;">
+12.10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IX
+</td>
+<td style="text-align:right;">
+547,452,172
+</td>
+<td style="text-align:right;">
+15.93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X
+</td>
+<td style="text-align:right;">
+1,012,797,489
+</td>
+<td style="text-align:right;">
+29.47
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+<p>Una vez que se construye la tabla anterior, es sencillo generar la curva de Lorenz. En ella se observa que el 50% de la población de menores ingresos recibe aproximadamente el 25% del ingreso total, menos del 30% que se queda sólo el 10% más rico de la población.</p>
+<pre class="r"><code>E$Decil_cf &lt;- 1:10
+rbind(0,E) %&gt;% arrange(Ing_tot_dec) %&gt;% 
+  ggplot(aes(x=Decil_cf, y=cumsum(Pop_dec_ing_tot), group = 1)) + 
+  geom_line() + geom_point() + 
+  geom_abline(intercept = 0, slope = 10) + 
+  coord_cartesian(c(0,10),c(0,100), expand = F) +
+  scale_x_continuous(breaks = seq(0,10,1), limits = c(0,10)) +
+  scale_y_continuous(breaks = seq(0,100,10), limits = c(0,100)) +
+  labs(x = &quot;Decil de ingreso&quot;, y = &quot;Porcentaje de ingreso&quot;, 
+       title = &quot;México: curva de Lorenz, 2018&quot;, 
+       caption = &quot;Fuente: elaboración propia con datos de la ENIGH, INEGI&quot;) +
+  theme_bw()</code></pre>
+<p><img src="ENIGH101_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Como ya bien sabes, el <strong>índice de Gini</strong> es una medida numérica agregada de la desigualdad del ingreso que varía de 0 (igualdad perfecta) a 1 (desigualdad perfecta). Se mide gráficamente dividiendo el área entre la línea de igualdad perfecta y la curva de Lorenz entre el área total del triángulo que se forma a la derecha de la línea de igualdad en el diagrama de Lorenz. Cuanto mayor es el valor del coeficiente, mayor es la desigualdad en la distribución del ingreso; cuanto menor es, más equitativa es la distribución del ingreso.</p>
+<p>La libreria <em>reldist</em> (que usamos para generar los deciles y los percentiles incorporando el factor de expansión) contiene una función que permite calcular el índice de Gini de manera sencilla (tal cual, la función se llama <em>gini()</em>). A continuación calculamos el índice de gini con y sin factor de expansión con el fin de resaltar una vez más la importancia de tomarlo en cuenta.</p>
+<pre class="r"><code>gini_sf &lt;- gini(ENIGH$ing_cor)
+gini_cf &lt;- gini(ENIGH$ing_cor, weights = ENIGH$factor)
+
+kable(cbind(gini_sf, gini_cf), col.names = c(&quot;Gini sin factor de expansión&quot;, &quot;Gini con factor de expansión&quot;), 
+      caption = &quot;México, coeficiente de gini de mercado, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 3) %&gt;%
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+México, coeficiente de gini de mercado, 2018
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Gini sin factor de expansión
+</th>
+<th style="text-align:right;">
+Gini con factor de expansión
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.427
+</td>
+<td style="text-align:right;">
+0.438
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
+<pre class="r"><code>ENIGH_10_alto &lt;- ENIGH %&gt;% filter(Decil_cf==&quot;X&quot;)
+gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor)</code></pre>
+<pre><code>## [1] 0.2701702</code></pre>
+<pre class="r"><code>ENIGH_100_alto &lt;- ENIGH %&gt;% filter(Percentil==100)
+gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)</code></pre>
+<pre><code>## [1] 0.2954872</code></pre>
+<pre class="r"><code>kable(cbind(gini(ENIGH_10_alto$ing_cor, ENIGH_10_alto$factor), 
+            gini(ENIGH_100_alto$ing_cor, ENIGH_100_alto$factor)),
+      col.names = c(&quot;Gini del 10% más rico&quot;, &quot;Gini del 1% más rico&quot;), 
+      caption = &quot;México, coeficientes de gini de mercado, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 3) %&gt;%
+  kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
+  footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+México, coeficientes de gini de mercado, 2018
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Gini del 10% más rico
+</th>
+<th style="text-align:right;">
+Gini del 1% más rico
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.27
+</td>
+<td style="text-align:right;">
+0.295
+</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<span style="font-style: italic;">Fuente: elaboracion propia con datos de la ENIGH, INEGI.</span>
+</td>
+</tr>
+<tr>
+<td style="padding: 0; border: 0;" colspan="100%">
+<sup></sup>
+</td>
+</tr>
+</tfoot>
+</table>
 </div>
 </div>
 

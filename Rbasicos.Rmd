@@ -418,18 +418,12 @@ Si quieres tus tablas para formato latex sólo tienes que añadir la opción *fo
 # Trabajar bases de datos 
 La libreria más usada para manipular bases de datos es *tidyverse*, aquí te muestro sus funciones básicas. Se compone de cinco verbos principales: 
 
-* arrange, para reordenar las filas;
-* filter, para filtrar o elegir las observaciones por sus valores; 
-* select, para seleccionar las variables; 
-* mutate, para crear nuevas variables con transformaciones de variables existentes; 
-* summarize, para contraer muchos valores en un solo resumen.
+* *select*, para seleccionar un subonjuto de variables de tu *data frame*; 
+* *arrange*, para reordenar las filas según los valores del alguna variable;
+* *filter*, para filtrar o elegir las observaciones según algún criterio; 
+* *mutate*, para crear nuevas variables (o modifcar las existentes). 
 
-Para ello normalmente requerirás de operadores lógicos mostrados al inicio, además de los siguientes: 
-
-* &, es “y”; 
-* |, es “o”; 
-* !, es “no”.
-
+Otros verbos de *tidyverse* que resultan muy útiles son *group_by* y *summarize*. El primero sirve para agrupar las observaciones según algún criterio o variable, y el segundo para crear una variable que resuma las observaciones según el grupo. 
 
 # Gráficas 
 Te recomiendo usar el paquete *ggplot* que se carga junto con la libreria de *tidyverse*, el cual tiene un montón de formas de tunear tus gráficas. Si bien hay muchas formas de escribir una misma gráfica, te presenteo aquí la que me parece más sencilla. Primero indica tu base de datos, luego un "*pipe*", y siempre deberás inciar con el comando *ggplot*, dentro del cual puedes meter una "estética" (*aes*) global, es decir lo que irá en cada eje $x$ y $y$, entre otras cosas. Veamos algunos ejemplos. 
