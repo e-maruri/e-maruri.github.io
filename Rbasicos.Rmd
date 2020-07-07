@@ -6,17 +6,7 @@ output:
     toc: true
     toc_depth: 3
     toc_float: true
-    theme: lumen
-header:
-  - \usepackage{amsmath}
-  - \usepackage[spanish]{babel}
-  - \selectlanguage{spanish}
 ---
-
-<style>
-body {
-text-align: justify}
-</style>
 
 ```{r, echo=FALSE}
 pacman::p_load(tidyverse, 

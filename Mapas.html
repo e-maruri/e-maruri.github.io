@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Mapas de INEGI en R</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Emmanuel Maruri</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Inicio
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Códigos de R
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Rbasicos.html">R mínimo para economistas</a>
+    </li>
+    <li>
+      <a href="ENIGH101.html">ENIGH 101</a>
+    </li>
+    <li>
+      <a href="Mapas.html">Mapas de INEGI en R</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Mapas de INEGI en R</h1>
+<h4 class="date">06 de julio del 2020</h4>
+
+</div>
+
+
+<p>En este pequeño tutorial explico la manera más rápida y sencilla (a mi parecer) de crear mapas con el software R. Las únicas librerías necesarias son las siguientes:</p>
+<pre class="r"><code>pacman::p_load(
+  tidyverse,  # para manupilar las bases de datos
+  sf,         # para leer los archivos con datos geoespaciales
+  tmap        # para hacer los mapas
+  )</code></pre>
+<div id="bases-de-datos-geoespaciales-del-inegi-en-r" class="section level1">
+<h1>Bases de datos geoespaciales (del INEGI) en R</h1>
+<p>El INEGI proporciona muchos tipos de mapas de fácil acceso. Actualmente la ruta más corta es, una vez en el sitio del <a href="https://www.inegi.org.mx/default.html">INEGI</a>, ir a la pestaña Datos &gt; Marco Geoestadístico y ahí descargar la versión más reciente del formato <em>shape file</em>, shp. Nótese que la versión completa pesa más de 3gb, por lo que debes dar click en la <em>i</em> para ver lo que contiene el archivo completo, y una vez ahí descargar el Marco Geoestadístico Inetegrado, que se refiere al país completo, en este caso utilizo la versión de <a href="http://internet.contenidos.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463776079/mg_sep2019_integrado.zip">septiembre de 2019</a>.</p>
+<p>El archivo descargado contiene 3 carpetas, la que nos interesa es la que se llama “conjunto_de_datos”, básicamente debes de poner esta carpeta en tu directorio de trabajo y listo. Sin embargo, aquí muestro cómo acceder al contenido de esta carpeta desde R de manera totalmente reproducible apartir de la descarga del INEGI (se enreda un poco porque quiero mantener todo en mi carpeta llamada “Bases” para no perder el orden):</p>
+<ol style="list-style-type: decimal">
+<li>Con la función <em>download.file()</em> descargo el archivo, lo guardo dentro de mi carpeta Bases y lo llamo mapas_inegi.zip.</li>
+<li>Descomprimo el archivo con la función <em>unzip()</em>.</li>
+<li>Analizo con la función <em>dir()</em> mis carpetas hasta encontrar el archivo que busco.</li>
+</ol>
+<pre class="r"><code># Descargar el archivo con los mapas
+download.file(&quot;http://internet.contenidos.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463776079/mg_sep2019_integrado.zip&quot;, 
+              destfile = &quot;Bases/mapas_inegi.zip&quot;)
+
+# Descomprimir el archivo
+unzip(&quot;Bases/mapas_inegi.zip&quot;, 
+      exdir = &quot;Bases&quot;)
+
+# Ver lo que tenemos la carpeta Bases; descomprimir el archivo creó la carpeta mg_sep2019_integrado
+dir(&quot;Bases&quot;)</code></pre>
+<pre><code>## [1] &quot;BIE_Des_Inf_2005-2019.csv&quot;       &quot;ENIGH_concentradohogar_2018.csv&quot;
+## [3] &quot;mapas_inegi.zip&quot;                 &quot;mg_sep2019_integrado&quot;           
+## [5] &quot;SIE_IPC_Cetes28_1990-2019.csv&quot;</code></pre>
+<pre class="r"><code># Ver el contenido de la carpeta mg_sep2019_integrado
+dir(&quot;Bases/mg_sep2019_integrado&quot;)</code></pre>
+<pre><code>## [1] &quot;catalogos&quot;         &quot;conjunto_de_datos&quot; &quot;metadatos&quot;</code></pre>
+<pre class="r"><code># Ver el contenido de la carpeta &quot;conjunto de datos&quot;
+dir(&quot;Bases/mg_sep2019_integrado/conjunto_de_datos&quot;)</code></pre>
+<pre><code>##  [1] &quot;00a.cpg&quot;   &quot;00a.dbf&quot;   &quot;00a.prj&quot;   &quot;00a.shp&quot;   &quot;00a.shx&quot;   &quot;00ent.cpg&quot;
+##  [7] &quot;00ent.dbf&quot; &quot;00ent.prj&quot; &quot;00ent.shp&quot; &quot;00ent.shx&quot; &quot;00l.cpg&quot;   &quot;00l.dbf&quot;  
+## [13] &quot;00l.prj&quot;   &quot;00l.shp&quot;   &quot;00l.shx&quot;   &quot;00lpr.cpg&quot; &quot;00lpr.dbf&quot; &quot;00lpr.prj&quot;
+## [19] &quot;00lpr.shp&quot; &quot;00lpr.shx&quot; &quot;00mun.cpg&quot; &quot;00mun.dbf&quot; &quot;00mun.prj&quot; &quot;00mun.shp&quot;
+## [25] &quot;00mun.shx&quot;</code></pre>
+<p>¿Qué significan estos archivos? Los documentos de la carpeta <em>catálogos</em> explican que los nombres de archivos se conforman con las claves 00 y la capa con sufijos descriptivos del contenido del archivo, donde:</p>
+<ul>
+<li>00ent Polígonos de Áreas Geoestadísticas Estatales;</li>
+<li>00mun Polígonos de Áreas Municipales;</li>
+<li>00a Polígonos de Áreas Geoestadísticas Básicas Urbanas y Rurales;</li>
+<li>00l Polígonos de Localidades Urbanas y Rurales amanzanadas;</li>
+<li>00lpr Puntos de Localidades Rurales amanzanadas y no amanzanadas.</li>
+</ul>
+<p>Para trabajar en R los archivos que nos interesan son los <em>shape file</em> (con extensión <em>.shp</em>), estos son los que contienen la información geoespacial para crear los mapas. Existen diversas librerias en R especiales para trabajar con información geoespacial como <em>rgdal</em>, <em>sp</em> o <em>sf</em>, aquí utilizaremos esta última porque es la que simplifica más el trabajo.</p>
+<p>Para cargar el mapa del INEGI utilizamos la función <em>st_read</em> de la librería <em>sf</em> (que debes instalar previamente), simplemente hay que indicarle la ruta del archivo, como se muestra a continuación. Nótese que este objeto tiene clase <em>sf</em> y <em>dataframe</em>, al ver las primeras observaciones nos damos cuenta que es como un <em>data frame</em> cualquiera, donde la variable <em>geometry</em> contiene la información necesaria para generar los mapas.</p>
+<pre class="r"><code># Para cargar el mapa a nivel estatal 
+mapa_mex_edos &lt;- st_read(&quot;Bases/mg_sep2019_integrado/conjunto_de_datos/00ent.shp&quot;, 
+                         options = &quot;ENCODING=WINDOWS-1252&quot;)</code></pre>
+<pre><code>## options:        ENCODING=WINDOWS-1252 
+## Reading layer `00ent&#39; from data source `C:\Users\marur\Documents\GitHub\e-maruri.github.io\Bases\mg_sep2019_integrado\conjunto_de_datos\00ent.shp&#39; using driver `ESRI Shapefile&#39;
+## Simple feature collection with 32 features and 3 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 911292 ymin: 319149.1 xmax: 4082997 ymax: 2349615
+## projected CRS:  MEXICO_ITRF_2008_LCC</code></pre>
+<pre class="r"><code># Ver la clase del objeto
+class(mapa_mex_edos)</code></pre>
+<pre><code>## [1] &quot;sf&quot;         &quot;data.frame&quot;</code></pre>
+<pre class="r"><code># Ver las primeras observaciones de la base de datos
+head(mapa_mex_edos)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 3 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 911292 ymin: 692158.7 xmax: 3859532 ymax: 2349615
+## projected CRS:  MEXICO_ITRF_2008_LCC
+##   CVEGEO CVE_ENT               NOMGEO                       geometry
+## 1     01      01       Aguascalientes MULTIPOLYGON (((2470518 115...
+## 2     02      02      Baja California MULTIPOLYGON (((1493197 184...
+## 3     03      03  Baja California Sur MULTIPOLYGON (((1694656 122...
+## 4     04      04             Campeche MULTIPOLYGON (((3544897 946...
+## 5     05      05 Coahuila de Zaragoza MULTIPOLYGON (((2469954 197...
+## 6     06      06               Colima MULTIPOLYGON (((1157633 768...</code></pre>
+<p>Ahora aprovechamos para cargar también la base de datos a nivel municipal para ver cómo se diferencia con la de nivel estatal. Del análisis de su estructura vemos que esta base de datos contiene 2465 observaciones, una por cada municipio. Destacan tres cosas: primero, que la columna CVEGEO es diferente pues ahora contiene 5 dígitos en vez de sólo 2; segundo, que hay una nueva columna con la clave de la entidad; y tercero, que l nombre del estado ha desaparecido dejando lugar sólo al nombre de cada municipio.</p>
+<pre class="r"><code># Para cargar el mapa a nivel municipal 
+mapa_mex_mun &lt;- st_read(&quot;Bases/mg_sep2019_integrado/conjunto_de_datos/00mun.shp&quot;, 
+                        options = &quot;ENCODING=WINDOWS-1252&quot;)</code></pre>
+<pre><code>## options:        ENCODING=WINDOWS-1252 
+## Reading layer `00mun&#39; from data source `C:\Users\marur\Documents\GitHub\e-maruri.github.io\Bases\mg_sep2019_integrado\conjunto_de_datos\00mun.shp&#39; using driver `ESRI Shapefile&#39;
+## Simple feature collection with 2465 features and 4 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 911292 ymin: 319149.1 xmax: 4082997 ymax: 2349615
+## projected CRS:  MEXICO_ITRF_2008_LCC</code></pre>
+<pre class="r"><code># Ver la estructura de la base de datos
+str(mapa_mex_mun)</code></pre>
+<pre><code>## Classes &#39;sf&#39; and &#39;data.frame&#39;:   2465 obs. of  5 variables:
+##  $ CVEGEO  : Factor w/ 2465 levels &quot;01001&quot;,&quot;01002&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ CVE_ENT : Factor w/ 32 levels &quot;01&quot;,&quot;02&quot;,&quot;03&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ CVE_MUN : Factor w/ 570 levels &quot;001&quot;,&quot;002&quot;,&quot;003&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ NOMGEO  : Factor w/ 2323 levels &quot;Abalá&quot;,&quot;Abasolo&quot;,..: 36 128 240 436 766 1081 1178 1346 1992 527 ...
+##  $ geometry:sfc_MULTIPOLYGON of length 2465; first list element: List of 1
+##   ..$ :List of 1
+##   .. ..$ : num [1:1688, 1:2] 2489073 2489353 2489350 2489302 2489277 ...
+##   ..- attr(*, &quot;class&quot;)= chr  &quot;XY&quot; &quot;MULTIPOLYGON&quot; &quot;sfg&quot;
+##  - attr(*, &quot;sf_column&quot;)= chr &quot;geometry&quot;
+##  - attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA
+##   ..- attr(*, &quot;names&quot;)= chr  &quot;CVEGEO&quot; &quot;CVE_ENT&quot; &quot;CVE_MUN&quot; &quot;NOMGEO&quot;</code></pre>
+<div id="visualizar-mapas-descargados" class="section level2">
+<h2>Visualizar mapas descargados</h2>
+<p>Hay varias librerias que sirven para hacer mapas, una de ellas es <em>ggplot</em> que incluye varias funciones especiales para ello, <a href="https://www.prestevez.com/es/tutorial/tutorial-mapas-con-R-y-tidyverse/">aquí un breve tutorial con datos sobre COVID</a> y <a href="https://www.institutomora.edu.mx/testU/SitePages/martinpaladino/Mapas_con_R.html">aquí un tutorial del Instituto Mora</a> (aunque utiliza la librería <em>rgdal</em> para leer los archivos .shp que complica las cosas, además está bastante desactualizado). Un ejemplo con los datos espaciales del INEGI:</p>
+<pre class="r"><code>mapa_mex_edos %&gt;% 
+  ggplot() +
+  geom_sf()</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Otra librería para hacer mapas es <em>tmap</em>, esta fue creada especialmente para hacer mapas y me parece que su sintaxis es más sencilla que la de <em>ggplot</em> por lo que será la que usaremos en adelante. Aquí un ejemplo del mismo mapa hecho antes:</p>
+<pre class="r"><code>tm_shape(mapa_mex_edos) + 
+  tm_borders() </code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+</div>
+<div id="mapear-datos-de-la-enigh" class="section level1">
+<h1>Mapear datos de la ENIGH</h1>
+<p>La Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) es una de las encuestas más importantes de información económica en nuestro país, si quieres saber más sobre qué es, cómo descargarla y cómo utilizarla <a href="https://e-maruri.github.io/ENIGH101.html">aquí</a> te dejo una breve introducción que hice.</p>
+<p>Primero cargamos la ENIGH y extraemos las columas que nos interesan. Para el caso de los mapas quizá la más relevante es la columna <em>ubica_geo</em>, que contiene la ubicación geográfica de la vivienda, los dos primeros dígitos representan la clave de la entidad y los siguientes tres la clave del municipio (éstas son análogas en todos los documentos del INEGI).</p>
+<p>La idea básica para “mapear” datos en R consiste en unir o empatar los datos de interés a la base con la información geográfica y luego <em>tmap</em> se encarga del resto, para ello ambas bases deben tener alguna característica en común como puede ser el nombre del estado de la república o un número de identificación como en este caso.</p>
+<p>Un problema con la información de ubicación geográfica entre la ENIGH y los datos espaciales que descargamos es que en estos últimos aparece un 0 antes del primer dígito, el cual no aparece en la columna <em>ubica_geo</em>, y ambas columnas deben de coincidir para poder unir los datos. A continuación una posible solución.</p>
+<pre class="r"><code># Cargamos la ENIGH
+ENIGH &lt;- read.csv(&quot;Bases/ENIGH_concentradohogar_2018.csv&quot;)
+
+# Seleccionamos sólo tres variables y creamos una adicional para ponerle el identificador por estado
+ENIGH1 &lt;- ENIGH %&gt;% 
+  select(ubica_geo, factor, tot_integ, ing_cor) %&gt;%
+  mutate(CVE_ENT = 0)
+
+# Extraemos de la columna ubica_geo los identificadores de cada estado y los guardamos en la columna CVE_ENT
+for (j in 1:nrow(ENIGH1)) {
+  if( nchar(ENIGH1$ubica_geo[j] ) &lt; 5){
+  ENIGH1$CVE_ENT[j] &lt;- paste0(&quot;0&quot;, substr(ENIGH1$ubica_geo[j], start = 1, stop = 1)) 
+  } else { 
+  ENIGH1$CVE_ENT[j] &lt;- substr(ENIGH1$ubica_geo[j], start = 1, stop = 2)
+  }
+}
+
+# Convertimos la columna CVE_ENT en factor para que coincida con el de la base mapa_mex_edos
+ENIGH1$CVE_ENT &lt;- as.factor(ENIGH1$CVE_ENT)</code></pre>
+<p>Ahora sólo nos faltan los datos que queremos mapear, para esto necesitamos que tengan el mismo número de observaciones ambas bases, en este caso 32, una para cada estado de la república mexicana. En este ejemplo usaremos el ingreso promedio de cada estado (ponderado con el factor de expansión, claro) y la población total por estado, ya que son fáciles de calcular.</p>
+<pre class="r"><code># Calculamos el ingreso promedio ponderado por estado y lo guardamos en una nueva base
+ENIGH_edos &lt;- ENIGH1 %&gt;% group_by(CVE_ENT) %&gt;%
+  summarize(Ing_prom = weighted.mean(ing_cor, factor), 
+            Poblacion = sum(factor*tot_integ))</code></pre>
+<div id="unir-datos-entre-bases" class="section level2">
+<h2>Unir datos entre bases</h2>
+<p>El último paso antes de hacer un mapa coroplético es pegarle los datos de la base que queremos mapear a la base con datos espaciales. Esto lo realizamos con las funciones que <em>tidyverse</em> tiene para unir datos entre distintas bases. Existen dos familias básicas de verbos diseñadas para relacionar datos entre distintos <em>data frames</em>:</p>
+<p><strong>Uniones de transformación</strong> (del inglés mutating joins), que agregan nuevas variables a un <em>data frame</em> a partir de las observaciones coincidentes en otra tabla.</p>
+<p><strong>Uniones de filtro</strong> (del inglés filtering joins), que filtran observaciones en un <em>data frame</em> con base en si coinciden o no con una observación de otra tabla.</p>
+<p>Sean X y Y dos dataframes:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Familia</th>
+<th>Verbo</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mutating joins</td>
+<td>inner join</td>
+<td>mantiene todas las observaciones que aparecen en X y Y.</td>
+</tr>
+<tr class="even">
+<td>mutating joins</td>
+<td>left join</td>
+<td>mantiene todas las observaciones en X.</td>
+</tr>
+<tr class="odd">
+<td>mutating joins</td>
+<td>right join</td>
+<td>mantiene todas las observaciones en Y.</td>
+</tr>
+<tr class="even">
+<td>mutating joins</td>
+<td>full join</td>
+<td>mantiene todas las observaciones en X e Y.</td>
+</tr>
+<tr class="odd">
+<td>filtering joins</td>
+<td>semi join</td>
+<td>mantiene todas las observaciones en x con coincidencias en Y.</td>
+</tr>
+<tr class="even">
+<td>filtering joins</td>
+<td>anti join</td>
+<td>descarta todas las observaciones en x con coincidencias en Y.</td>
+</tr>
+</tbody>
+</table>
+<p>Como tenemos 32 observaciones en cada <em>data frame</em> que queremos unir, una por cada estado, el resultado será el mismo al usar cualquiera de los primeros 5 verbos de la tabla anterior. La sintaxis básica para el usar estos verbos se muestra a continuación.</p>
+<pre class="r"><code># Replicamos la base original para poder regresar a ella por si nos equivocamos
+mapeo_edos &lt;- mapa_mex_edos
+
+# Pegamos los datos de ENIGH_edos al dataframe &quot;mapeo_edos&quot; con la función inner_join
+mapeo_edos &lt;- inner_join(mapa_mex_edos, ENIGH_edos, 
+                   by = &quot;CVE_ENT&quot;)
+
+# Confirmamos que se han pegado los datos correctamente
+head(mapeo_edos)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 5 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 911292 ymin: 692158.7 xmax: 3859532 ymax: 2349615
+## projected CRS:  MEXICO_ITRF_2008_LCC
+##   CVEGEO CVE_ENT               NOMGEO Ing_prom Poblacion
+## 1     01      01       Aguascalientes 59346.35   1342587
+## 2     02      02      Baja California 59177.74   3648116
+## 3     03      03  Baja California Sur 68778.27    839675
+## 4     04      04             Campeche 47699.92    952279
+## 5     05      05 Coahuila de Zaragoza 55924.79   3073513
+## 6     06      06               Colima 52765.77    763300
+##                         geometry
+## 1 MULTIPOLYGON (((2470518 115...
+## 2 MULTIPOLYGON (((1493197 184...
+## 3 MULTIPOLYGON (((1694656 122...
+## 4 MULTIPOLYGON (((3544897 946...
+## 5 MULTIPOLYGON (((2469954 197...
+## 6 MULTIPOLYGON (((1157633 768...</code></pre>
+</div>
+<div id="primer-mapa-coroplético-a-nivel-estatal" class="section level2">
+<h2>Primer mapa coroplético (a nivel estatal)</h2>
+<p>Una vez en este punto es fácil realizar el mapa coroplético, simplemente hay que usar la función <em>tm_fill</em> de la libreria <em>tmap</em> como se muestra a continuación:</p>
+<pre class="r"><code># Primer mapa 
+tm_shape(mapeo_edos) + 
+  tm_fill(col = &quot;Ing_prom&quot;)</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>El mismo mapa con <em>ggplot</em> se hace con el siguiente código:</p>
+<pre class="r"><code>mapeo_edos %&gt;% 
+  ggplot(aes(fill=Ing_prom)) + 
+  geom_sf()</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="segundo-mapa-coroplético-a-nivel-municipal" class="section level2">
+<h2>Segundo mapa coroplético (a nivel municipal)</h2>
+<p>Para crear un mapa a nivel municipal se realiza exactamente el mismo proceso pero con los datos municipales.</p>
+<pre class="r"><code># Respaldo 
+mapeo_mun &lt;- mapa_mex_mun
+
+# Crear a base con datos de la ENIGH a nivel municipal 
+ENIGH_muni &lt;- ENIGH1 %&gt;% group_by(ubica_geo) %&gt;%
+  summarize(Ing_prom = weighted.mean(ing_cor, factor), 
+            Poblacion = sum(factor*tot_integ)) %&gt;% 
+  mutate(CVEGEO = 0) 
+
+# Extraemos de la columna ubica_geo los identificadores de cada estado y los guardamos en la columna CVEGEO
+for (j in 1:nrow(ENIGH_muni)) {
+  if( nchar(ENIGH_muni$ubica_geo[j] ) &lt; 5){
+  ENIGH_muni$CVEGEO[j] &lt;- paste0(&quot;0&quot;, substr(ENIGH_muni$ubica_geo[j], start = 1, stop = 5)) 
+  } else { 
+  ENIGH_muni$CVEGEO[j] &lt;- substr(ENIGH_muni$ubica_geo[j], start = 1, stop = 5)
+  }
+}
+
+# Convertimos la columna CVE_ENT en factor para que coincida con el de la base mapa_mex_mun
+ENIGH_muni$CVEGEO &lt;- as.factor(ENIGH_muni$CVEGEO)
+
+# Ver la estructura
+str(ENIGH_muni)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    996 obs. of  4 variables:
+##  $ ubica_geo: int  1001 1002 1003 1005 1006 1007 1008 1009 1010 1011 ...
+##  $ Ing_prom : num  63228 56885 39087 61712 55475 ...
+##  $ Poblacion: int  865543 34808 52511 106863 56027 77549 18732 28497 37877 64180 ...
+##  $ CVEGEO   : Factor w/ 996 levels &quot;01001&quot;,&quot;01002&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...</code></pre>
+<pre class="r"><code># Se observa que sólo hay observaciones para 996 municipios, por lo que pegamos los datos de ENIGH_muni al dataframe &quot;mapeo_mun&quot; con la función left_join
+mapeo_mun &lt;- left_join(mapa_mex_mun, ENIGH_muni, 
+                   by = &quot;CVEGEO&quot;)</code></pre>
+<p>Para crear el mismo mapa del ingreso promedio pero ahora a nivel municipal:</p>
+<pre class="r"><code>tm_shape(mapeo_mun) + 
+  tm_fill(col=&quot;Ing_prom&quot;)</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Nótese que los municipios en gris son los que no fueron considerados en la ENIGH de 2018, esto porque sólo se hace a nivel municipal en los años múltiplos del 5 (2000, 2005, etc.). De la parte en color distinto al gris se observa que el mapa presenta prácticamente un solo color, esto se debe a que hay una observación bastante atípica.</p>
+<p>Para ver cuál es y eliminarla para que el mapa se vea más decente primero ordenamos la base por ingreso promedio:</p>
+<pre class="r"><code># Primeras observaciones de la base ordenada por ingreso promedio
+head(ENIGH_muni %&gt;% arrange(desc(Ing_prom)), n=10)</code></pre>
+<pre><code>## # A tibble: 10 x 4
+##    ubica_geo Ing_prom Poblacion CVEGEO
+##        &lt;int&gt;    &lt;dbl&gt;     &lt;int&gt; &lt;fct&gt; 
+##  1     19019  572792.     54585 19019 
+##  2      9014  217543.    476547 09014 
+##  3      9016  131095.    342772 09016 
+##  4     20414  129800.     33280 20414 
+##  5      8054  126475.     11340 08054 
+##  6     30206  108143.     56440 30206 
+##  7     28005  107689.     40778 28005 
+##  8      9010  102347.    624115 09010 
+##  9     22006  101982.    174571 22006 
+## 10     15037   98068.    269774 15037</code></pre>
+<pre class="r"><code># Para ver qué municipio es el 19019
+mapeo_mun %&gt;% filter(ubica_geo == 19019)</code></pre>
+<pre><code>## Simple feature collection with 1 feature and 7 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: 2657066 ymin: 1505565 xmax: 2668631 ymax: 1519350
+## projected CRS:  MEXICO_ITRF_2008_LCC
+##   CVEGEO CVE_ENT CVE_MUN                 NOMGEO ubica_geo Ing_prom
+## 1  19019      19     019 San Pedro Garza García     19019 572791.7
+##   Poblacion                       geometry
+## 1     54585 MULTIPOLYGON (((2657500 151...</code></pre>
+<p>El municipio que causa problemas es el de San Pedro Garza García en Nuevo León (19019), pues tiene un ingreso promedio más de 300 mil pesos por encima de su perseguidor más cercano, así que le asignamos NA para dejarlo fuera de la base y no altere el mapa.</p>
+<pre class="r"><code># Conocer la observación con el max ingreso promedio
+which.max(ENIGH_muni$Ing_prom)</code></pre>
+<pre><code>## [1] 518</code></pre>
+<pre class="r"><code># Sustituir esa observación por NA
+ENIGH_muni$Ing_prom[518] &lt;- NA
+
+# Volver a unir los datos entre bases
+mapeo_mun &lt;- left_join(mapa_mex_mun, ENIGH_muni, 
+                   by = &quot;CVEGEO&quot;)</code></pre>
+<p>Ahora volvemos a hacer el mismo mapa de antes:</p>
+<pre class="r"><code>tm_shape(mapeo_mun) + 
+  tm_fill(col=&quot;Ing_prom&quot;)</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Ni siquiera así quedó bonito el mapa, así que ahora lo hacemos con la población total por municipio implítica en la ENIGH:</p>
+<pre class="r"><code>tm_shape(mapeo_mun) + 
+  tm_fill(col=&quot;Poblacion&quot;)</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+</div>
+<div id="tercer-mapa-coroplético-municipios-de-un-solo-estado" class="section level2">
+<h2>Tercer mapa coroplético (municipios de un solo Estado)</h2>
+<p>Para hacer mapas con los datos de un sólo Estado basta con crear un nuevo <em>data frame</em> filtrando las observaciones del estado que se desee. Por ejemplo, para el caso de Aguascaliententes con CVE_ENT = 01 es así:</p>
+<pre class="r"><code># Crear un mapa sólo con los datos de ags
+mapa_ags &lt;- mapeo_mun %&gt;% filter(CVE_ENT == &quot;01&quot;)
+
+# Mapa coroplético de Ags. 
+tm_shape(mapa_ags)+
+  tm_fill(col = &quot;Ing_prom&quot;)+
+  tm_borders()</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>Ahora para la CDMX:</p>
+<pre class="r"><code># Filtramos CDMX
+mapa_cdmx &lt;- mapeo_mun %&gt;% filter(CVE_ENT == &quot;09&quot;)
+
+# Mapeamos 
+tm_shape(mapa_cdmx)+
+  tm_fill(col = &quot;Ing_prom&quot;)+
+  tm_borders()</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+</div>
+<div id="tunear-los-mapas" class="section level1">
+<h1>Tunear los mapas</h1>
+<p>Por supuesto, siempre hay mucho que añadir a la versión por defecto del mapa para que se vea presentable. Aquí un ejemplo de cómo modficar el código del primer mapa para quede más bonito:</p>
+<pre class="r"><code>tm_shape(mapeo_edos) + 
+  tm_fill(col = &quot;Ing_prom&quot;, 
+          title = &quot;Miles de pesos&quot;,
+          palette = &quot;Greens&quot;, 
+          labels = c(&quot;20 a 30&quot;, &quot;30 a 40&quot;, &quot;40 a 50&quot;, 
+                     &quot;50 a 60&quot;, &quot;60 a 70&quot;, &quot;70 a 80&quot;)) + 
+  tm_borders(col = &quot;grey60&quot;,
+             lwd = 0.5) + 
+  tm_layout(main.title = &quot;Ingreso promedio trimestral por Estado, 2018&quot;, 
+            main.title.position = &quot;center&quot;,
+            frame = F) +
+  tm_credits(&quot;Fuente: elaboración propia con datos de la ENIGH, INEGI.&quot;, 
+             position = c(&quot;left&quot;, &quot;bottom&quot;))</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>Ahora tuneamos el mapa de población a nivel municipal:</p>
+<pre class="r"><code>tm_shape(mapeo_mun) + 
+  tm_fill(col=&quot;Poblacion&quot;, 
+          title = &quot;Miles de personas&quot;, 
+          palette = &quot;viridis&quot;, 
+          labels = c(&quot;1 a 500&quot;, &quot;500 a 1,000&quot;, 
+                     &quot;1,000 a 1,500&quot;, &quot;1,500 a 2,000&quot;), 
+          textNA = &quot;No disponible&quot;, 
+          colorNA = &quot;red&quot;) + 
+  tm_layout(main.title = &quot;Población por municipio implícita en la ENIGH, 2018&quot;,
+            main.title.position = &quot;center&quot;,
+            frame = F) + 
+  tm_credits(&quot;Fuente: elaboración propia con datos de la ENIGH, INEGI.&quot;, 
+             position = c(&quot;left&quot;, &quot;bottom&quot;))</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Finalemente, tuneamos el mapa de las delegaciones para mostrar cómo es que se puede poner el nombre a cada observación (para este fin fue que utilizamos el argumento <em>options = “ENCODING=WINDOWS-1252”</em> al cargar las bases de los mapas, pues de no hacerse así no reconoce adecuadamente los acentos).</p>
+<pre class="r"><code>tm_shape(mapa_cdmx) +
+  tm_fill(col = &quot;Ing_prom&quot;, 
+          title = &quot;Miles de pesos&quot;, 
+          palette = &quot;RdYlGn&quot;, 
+          labels = c(&quot;0 a 50&quot;, &quot;50 a 100&quot;, &quot;100 a 150&quot;, 
+                     &quot;150 a 200&quot;, &quot;200 a 250&quot;)) +
+  tm_borders() + 
+  tm_text(text = &quot;NOMGEO&quot;,
+          col = &quot;black&quot;, 
+          scale = 0.5, 
+          remove.overlap = F,
+          just = &quot;top&quot;) +
+  tm_layout(main.title = &quot;CDMX: ingreso promedio trimestral por delegación, 2018&quot;, 
+            main.title.position = &quot;center&quot;, 
+            main.title.size = 1.2,
+            legend.outside = T, 
+            frame = F) + 
+  tm_credits(&quot;Fuente: elaboración propia con datos de la ENIGH, INEGI.&quot;,
+             position = c(&quot;LEFT&quot;, &quot;BOTTOM&quot;))</code></pre>
+<p><img src="Mapas_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p>Para ver las distintas paletas de colores disponibles utiliza el siguiente código:</p>
+<pre class="r"><code># install.packages(&quot;shinyjs&quot;)
+# tmaptools::palette_explorer()</code></pre>
+</div>
+
+<h2 class="my-4 pt-4 pt-lg-0">Contacto</h2>
+
+<p class="mb-1"><a href="mailto:emaruri@colmex.mx">emaruri@colmex.mx</a> </p>
+<a href="https://twitter.com/maruri_ec" rel="noopener" class="fab fa-twitter"></a>
+<a href="https://github.com/e-maruri" rel="noopener" class="fab fa-github"></a>
+
+<p class="copyright-text mt-5 pt-3">Copyright &copy; 2020 Emmanuel Maruri</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

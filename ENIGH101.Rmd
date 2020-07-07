@@ -1,15 +1,11 @@
 ---
 title: "ENIGH 101"
+date: "`r format(Sys.time(), '%d de %B del %Y')`"
 output:
   html_document:
     toc: true
     toc_depth: 3
     toc_float: true
-    theme: lumen
-header:
-  - \usepackage{amsmath}
-  - \usepackage[spanish]{babel}
-  - \selectlanguage{spanish}
 ---
 
 ```{r, echo=FALSE}
@@ -33,9 +29,10 @@ Actualmente la puedes descargar entrando al sitio del [INEGI](https://www.inegi.
 Aquí usaré la versión de 2018 en formato .csv, la más reciente a la fecha, la cual he subido a mi sitio de github para que sea más fácil replicar todo. 
 
 ```{r, cache=TRUE}
-ENIGH <- read.csv("https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv")
+ENIGH <- read.csv("https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/Bases/ENIGH_concentradohogar_2018.csv")
 
-#ENIGH <- read.csv("ENIGH_concentradohogar_2018.csv")
+# Para más rápido siguiendo la ruta: 
+# ENIGH <- read.csv("Bases/ENIGH_concentradohogar_2018.csv")
 ```
 
 # Resultados básicos
@@ -59,7 +56,7 @@ kable(A, col.names = c("Cantidad"),
 ```
 
 ## Deciles de ingreso 
-Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso. Una vez más mostraremos cómo cambian los resultados cuando consideramos no consideramos el factor de expansión. 
+Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso; mostraremos cómo cambian los resultados cuando no consideramos el factor de expansión. 
 
 Primero una secuencia del 0.1 al 1 con incrementos de 0.1 con la función *seq()*, y luego creamos los deciles de ingreso con la función *quantile()*. Luego hacemos lo mismo con la función *wtd.quantile()* de la libreria *reldist* (que debes instalar previamente). 
 
@@ -125,7 +122,7 @@ C <- ENIGH %>% group_by(Decil_cf) %>%
   arrange(Ing_prom)
 
 kable(cbind(B,C[,2]), col.names = c("Decil", "Sin factor de expansión", "Con factor de expansión"), 
-      caption = "Ingreso pormedio por decil, 2018", format.args = list(big.mark = ","), digits = 0) %>%
+      caption = "Ingreso promedio por decil, 2018", format.args = list(big.mark = ","), digits = 0) %>%
   kable_styling(full_width = F, bootstrap_options = "striped") %>%
   footnote(general_title = "Fuente: elaboracion propia con datos de la ENIGH, INEGI.", general = "")
 ```

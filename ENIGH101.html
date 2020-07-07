@@ -15,7 +15,7 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -74,6 +74,7 @@ h6 {
 }
 </style>
 
+<link rel="stylesheet" href="styles.css" type="text/css" />
 
 
 
@@ -108,33 +109,33 @@ summary {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 54px;
+  padding-top: 51px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h2 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h3 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h4 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h5 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h6 {
-  padding-top: 59px;
-  margin-top: -59px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .dropdown-submenu {
   position: relative;
@@ -370,6 +371,9 @@ div.tocify {
     <li>
       <a href="ENIGH101.html">ENIGH 101</a>
     </li>
+    <li>
+      <a href="Mapas.html">Mapas de INEGI en R</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -385,6 +389,7 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">ENIGH 101</h1>
+<h4 class="date">06 de julio del 2020</h4>
 
 </div>
 
@@ -398,9 +403,10 @@ div.tocify {
 <h1>¿Cómo descargarla?</h1>
 <p>Actualmente la puedes descargar entrando al sitio del <a href="https://www.inegi.org.mx/">INEGI</a>, y siguiendo la ruta Datos &gt; Programas &gt; Encuestas en hogares &gt; Regulares &gt; ENIGH &gt; Nueva serie &gt; Microdatos &gt; concentradohogar. Ahí también encontrarás los resultados simplificados que publica el INEGI y, además de los cuestionarios que realizan, hay un útil <a href="https://www.inegi.org.mx/contenidos/programas/enigh/nc/2018/doc/enigh18_descriptor_archivos_fd_ns.pdf">manual</a> que explica cada una de las variables que aparecen en la ENIGH (que te recomiendo tener siempre a la mano).</p>
 <p>Aquí usaré la versión de 2018 en formato .csv, la más reciente a la fecha, la cual he subido a mi sitio de github para que sea más fácil replicar todo.</p>
-<pre class="r"><code>ENIGH &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/ENIGH_concentradohogar_2018.csv&quot;)
+<pre class="r"><code>ENIGH &lt;- read.csv(&quot;https://raw.githubusercontent.com/e-maruri/e-maruri.github.io/master/Bases/ENIGH_concentradohogar_2018.csv&quot;)
 
-#ENIGH &lt;- read.csv(&quot;ENIGH_concentradohogar_2018.csv&quot;)</code></pre>
+# Para más rápido siguiendo la ruta: 
+# ENIGH &lt;- read.csv(&quot;Bases/ENIGH_concentradohogar_2018.csv&quot;)</code></pre>
 </div>
 <div id="resultados-básicos" class="section level1">
 <h1>Resultados básicos</h1>
@@ -490,7 +496,7 @@ Ingreso corriente c.f.
 </table>
 <div id="deciles-de-ingreso" class="section level2">
 <h2>Deciles de ingreso</h2>
-<p>Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso. Una vez más mostraremos cómo cambian los resultados cuando consideramos no consideramos el factor de expansión.</p>
+<p>Uno de los principales resultados de la ENIGH es que nos permite generar los llamados deciles de ingreso; mostraremos cómo cambian los resultados cuando no consideramos el factor de expansión.</p>
 <p>Primero una secuencia del 0.1 al 1 con incrementos de 0.1 con la función <em>seq()</em>, y luego creamos los deciles de ingreso con la función <em>quantile()</em>. Luego hacemos lo mismo con la función <em>wtd.quantile()</em> de la libreria <em>reldist</em> (que debes instalar previamente).</p>
 <p>Lo que muestra la siguiente tabla es el límite superior de cada decil, es decir, sin considerar el factor de expansión, un hogar que tiene un ingreso corriente trimestral por debajo de 12,498 pesos (aprox. 4200 al mes) se considera del 10% más pobre del país por ingresos. En el otro extremo un hogar con un ingreso corriente trimestral por encima de 88,006 pesos (aprox. 29300 al mes) se considera del 10% más rico por ingresos del país.</p>
 <p>Considerando el factor de expansión estas cifras cambian, y el cambio es mayor cuanto más subimos en la distribución del ingreso. Un hogar cuyo ingreso corriente trimestral sea mayor a 94,617 pesos (aprox. 31500 al mes) se considera del 10% más rico por ingresos del país.</p>
@@ -688,12 +694,12 @@ C &lt;- ENIGH %&gt;% group_by(Decil_cf) %&gt;%
   arrange(Ing_prom)
 
 kable(cbind(B,C[,2]), col.names = c(&quot;Decil&quot;, &quot;Sin factor de expansión&quot;, &quot;Con factor de expansión&quot;), 
-      caption = &quot;Ingreso pormedio por decil, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
+      caption = &quot;Ingreso promedio por decil, 2018&quot;, format.args = list(big.mark = &quot;,&quot;), digits = 0) %&gt;%
   kable_styling(full_width = F, bootstrap_options = &quot;striped&quot;) %&gt;%
   footnote(general_title = &quot;Fuente: elaboracion propia con datos de la ENIGH, INEGI.&quot;, general = &quot;&quot;)</code></pre>
 <table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-Ingreso pormedio por decil, 2018
+Ingreso promedio por decil, 2018
 </caption>
 <thead>
 <tr>
@@ -1821,6 +1827,13 @@ Gini del 1% más rico
 </div>
 </div>
 
+<h2 class="my-4 pt-4 pt-lg-0">Contacto</h2>
+
+<p class="mb-1"><a href="mailto:emaruri@colmex.mx">emaruri@colmex.mx</a> </p>
+<a href="https://twitter.com/maruri_ec" rel="noopener" class="fab fa-twitter"></a>
+<a href="https://github.com/e-maruri" rel="noopener" class="fab fa-github"></a>
+
+<p class="copyright-text mt-5 pt-3">Copyright &copy; 2020 Emmanuel Maruri</p>
 
 
 </div>

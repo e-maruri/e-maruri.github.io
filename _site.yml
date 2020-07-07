@@ -12,4 +12,11 @@ navbar:
         href: Rbasicos.html
       - text: "ENIGH 101"
         href: ENIGH101.html
-        
+      - text: "Mapas de INEGI en R"
+        href: Mapas.html
+output:
+  html_document:
+    theme: cosmo
+    include: 
+      after_body: footer.html
+    css: styles.css        

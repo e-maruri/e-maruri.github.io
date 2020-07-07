@@ -1,19 +1,16 @@
 ---
 title: "Acerca de"
 header:
-  - \usepackage{amsmath}
   - \usepackage[spanish]{babel}
   - \selectlanguage{spanish}
----
-```{r, echo=FALSE}
-pacman::p_load(knitr)
-```
 ---
 
 ¡Hola mundo!
 
-Soy Emmanuel Maruri, estudiante de maestría en economía en [El Colegio de México](https://www.colmex.mx/). 
+Soy [Emmanuel Maruri](EMaruri_cv_en_mar_20.pdf){width=500px}, estudiante de maestría en economía en [El Colegio de México](https://www.colmex.mx/). 
 
-[Twitter](https://twitter.com/maruri_ec)
+El propósito de este sitio es compartir algunos códigos sobre temas económicos. La idea originaria fue hacer una especie de resumen sobre lo que he aprendido de programación en R, de tal forma que tuviera donde consultar rápidamente cómo hacer cierta tarea en específico, por lo que la mayoría de los códigos están creados a manera de tutorial como para explicarme a mi mismo las cosas. 
 
-[CV](EMaruri_cv_en_mar_20.pdf){width=500px}
+A futuro espero subir cosas sobre temas más especializados e incluso en algunos otros *softwares* comúnmente utilizados en economía (y otras ciencias ¿sociales?) como Stata, Python, Mathlab, etc. Por ahora, todo lo que encontrarás aquí fue creado con **Rmarkdown**, incluso este sitio web ([aquí](https://bookdown.org/yihui/rmarkdown/) encontrarás una probadita de lo mucho que se puede hacer con **Rmarkdown**, realmente una chualada). 
+
+Abajo encontrarás mi dirección de contacto, si encuentras algún error en mis códigos que no te deja dormir, tienes alguna duda o comentario, o sabes una forma más fácil de cómo hacer cierta tarea, mándame un tuit y con gusto lo revisamos. 
