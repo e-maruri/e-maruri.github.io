@@ -1,0 +1,425 @@
+---
+title: "Maps in R"
+author:
+- Emmanuel Maruri ^[El Colegio de México, emaruri@colmex.mx]
+output:
+  html_document:
+    df_print: paged
+    highlight: tango
+    theme: simplex
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+header:
+- \usepackage{amsmath}
+- \usepackage[spanish]{babel}
+- \selectlanguage{spanish}
+urlcolor: blue
+---
+\renewcommand{\tablename}{Tabla} 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = FALSE, message = FALSE, fig.pos = "H")
+```
+
+```{r, echo=FALSE}
+pacman::p_load(tidyverse,
+               ggplot2,
+               sf,
+               tmap)
+```
+
+# Why should you use maps?
+
+Maps are used in a variety of fields to express data in an appealing and interpretive way. Data can be expressed into simplified patterns, and this data interpretation is generally lost if the data is only seen through a spread sheet. Maps can add vital context by incorporating many variables into an easy to read and applicable context. Maps are also very important in the information world because they can quickly allow the public to gain better insight so that they can stay informed. It’s critical to have maps be effective, which means creating maps that can be easily understood by a given audience.  
+
+Basic elements of a map that should be considered are polygon, points, lines, and text. 
+
+- Polygons, on a map, are closed shapes such as country borders. 
+- Lines are considered to be linear shapes that are not filled with any aspect, such as highways, streams, or roads. 
+- Finally, points are used to specify specific positions, such as city or landmark locations.
+
+Using R to create maps brings these benefits to mapping. Elements of a map can be added or removed with ease — R code can be tweaked to make major enhancements with a stroke of a key. It is also easy to reproduce the same maps for different data sets. 
+
+The package ggplot2 implements the grammar of graphics in R, as a way to create code that make sense to the user: The grammar of graphics is a term used to breaks up graphs into semantic components, such as geometries and layers. Practically speaking, it allows (and forces!) the user to focus on graph elements at a higher level of abstraction, and how the data must be structured to achieve the expected outcome. Recently, the package ggplot2 has allowed the use of simple features from the package sf as layers in a graph1. The combination of ggplot2 and sf therefore enables to programmatically create maps, using the grammar of graphics.
+
+
+# tmap function
+
+With the tmap package, thematic maps can be generated with great flexibility. The syntax for creating plots is similar to that of ggplot2, but tailored to maps.
+
+## First steps
+
+A good place to start is to create a map of the world. 
+
+The object World is a spatial object of [class sf](https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#How_simple_features_in_R_are_organized) from the sf package; it is a data.frame with a special column that contains a geometry for each row, in this case polygons. In order to plot it in tmap, you first need to specify it with tm_shape. Layers can be added with the + operator, in this case tm_polygons. There are many layer functions in tmap, which can easily be found in the documentation by their tm_ prefix.
+
+After installing tmap, the following lines of code should create the map shown below:
+
+```{r}
+library(tmap)
+data("World")
+
+tm_shape(World) +
+    tm_polygons("HPI")
+```
+
+## Interactive maps
+
+Each map can be plotted as a static image or viewed interactively using "plot" and "view" modes, respectively. The mode can be set with the function tmap_mode, and toggling between the modes can be done with the ‘switch’ ttm() (which stands for toggle thematic map.
+
+```{r}
+#tmap_mode("view")
+tm_shape(World) +
+    tm_polygons("HPI")
+```
+
+
+# Mexico's geodatabase from INEGI
+
+## Preparing the geodatabase
+
+The [National Institute of Statistics and Geography](https://en.wikipedia.org/wiki/National_Institute_of_Statistics_and_Geography) (INEGI by its name in Spanish: Instituto Nacional de Estadística y Geografía) is an autonomous agency of the Mexican Government dedicated to coordinate the National System of Statistical and Geographical Information of the country.  
+
+The [Geostatistical Framework](https://www.inegi.org.mx/temas/mg/) presents the division of the national territory into different levels of disaggregation to geographically refer the statistical information from the censuses and institutional surveys and from the Units of the Mexican State. In this case we use the September 2019 version.
+
+```{r}
+### (Only the first time, save it in your working directory)
+### Download the file with the maps 
+
+#download.file("http://internet.contenidos.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463776079/mg_sep2019_integrado.zip", 
+#              destfile = "~/Desktop/Code/R avanzado/Maps/mapas_inegi.zip")
+
+### Unzip the file
+
+#unzip("~/Desktop/Code/R avanzado/Maps/mapas_inegi.zip", 
+#      exdir = "Bases")
+```
+
+
+```{r}
+# Explore mg_sep2019_integrado
+dir("mg_sep2019_integrado")
+# Explore folder dataset:"conjunto de datos"
+dir("mg_sep2019_integrado/conjunto_de_datos")
+```
+
+What are these files? You'll find in the "catalogos" folder an explaination for each file, in summary, the file names conform the keys 00 and the layer with descriptive suffixes of the content of the file, where:
+
+-00ent Polygons of State Geostatistical Areas;
+- 00mun Polygons of Municipal Areas;
+- 00a Polygons of Basic Urban and Rural Geostatistical Areas;
+- 00l Urban and Rural Localities Polygons with blocks;
+- 00lpr Points of rural towns with and without blocks.
+
+To work in R we take the shape files (with the .shp extension), these files contain the geospatial information to create the maps. There are several special R libraries to work with geospatial information such as rgdal, sp or sf, here we will use the latter because is simpler.
+
+To load the INEGI map, we use the st_read function of the sf library, simply indicate the path of the file, as shown below. Note that this object has sf class and dataframe, when we see the first observations we realize that it is like any data frame, where the variable geometry contains the information necessary to generate the maps.
+
+```{r}
+# State level map
+mapa_mex_edos <- st_read("mg_sep2019_integrado/conjunto_de_datos/00ent.shp", 
+                         options = "ENCODING=WINDOWS-1252")
+head(mapa_mex_edos)
+str(mapa_mex_edos)
+```
+
+Now we also load the database at the municipal level to see how it differs from the state level. From the analysis of its structure we see that this database contains 2465 observations, one for each municipality.
+
+```{r}
+# Municipal level map
+mapa_mex_mun <- st_read("mg_sep2019_integrado/conjunto_de_datos/00mun.shp", 
+                        options = "ENCODING=WINDOWS-1252")
+head(mapa_mex_mun)
+```
+
+Three things stand out: first, that the CVEGEO column is different since it now contains 5 digits instead of just 2; second, that there is a new column with the entity key; and third, that the name of the state has disappeared leaving only the name of each municipality.
+
+## Visualizing the the geodatabase
+
+There are several libraries that serve to make maps, one of them is ggplot that includes [several special functions](https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html)
+
+```{r}
+mapa_mex_edos %>% 
+  ggplot() +
+  geom_sf()
+```
+
+Another mapmaking library is [tmap](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html), this was created especially for mapping and it has a simplier syntax that of ggplot, so it will be the one we will use from now on. Here is an example of the same map made before:
+
+```{r}
+tm_shape(mapa_mex_edos) + 
+  tm_borders() 
+```
+
+## Mapping from the Household Income and Expenditure Survey in Mexico
+
+The basic idea to “map” data in R is to unite or tie the data of interest to the base with the geographic information, for this, both bases must have some common feature such as the name of the State or an identification number such as in this case. Then tmap does the rest.
+
+First we load the ENIGH and extract the relevant columns. For maps, the most relevant is the **ubica_geo** column, which contains the geographical location. The first two digits represent the entity code and the next three digits represent the municipality code (these are analogous in all INEGI documents).
+
+```{r}
+ENIGH <- read_csv(
+  "https://raw.githubusercontent.com/diego-eco/diego-eco.github.io/master/downloads/ENIGH_concentradohogar_2018.csv")
+```
+
+
+```{r}
+# We select only three variables and create an additional one for the identifier by State "CVE_ENT"
+ENIGH1 <- ENIGH %>% 
+  select(ubica_geo, factor, tot_integ, ing_cor) %>%
+  mutate(CVE_ENT = 0)
+
+# We extract the identifiers of each state from the locate_geo column and save them in CVE_ENT. 
+# Note that we add a 0 when the State identifier does not start at 0
+
+for (j in 1:nrow(ENIGH1)) {
+  if( nchar(ENIGH1$ubica_geo[j] ) < 5){
+  ENIGH1$CVE_ENT[j] <- paste0("0", substr(ENIGH1$ubica_geo[j], start = 1, stop = 1)) 
+  } else { 
+  ENIGH1$CVE_ENT[j] <- substr(ENIGH1$ubica_geo[j], start = 1, stop = 2)
+  }
+}
+# We convert the CVE_ENT column into a factor to match that of the base mapa_mex_edos
+ENIGH1$CVE_ENT <- as.factor(ENIGH1$CVE_ENT)
+```
+
+Now we only need the data that we want to map, for this we need both bases to have the same number of observations, in this case 32, one for each state of the Mexican Republic. In this example we will use the average income of each state (weighted with the expansion factor) and the total population by state.
+
+```{r}
+# We calculate the State weighted average income and store it on a new dataframe
+ENIGH_edos <- ENIGH1 %>% group_by(CVE_ENT) %>%
+  summarize(Ing_prom = weighted.mean(ing_cor, factor), 
+            Poblacion = sum(factor*tot_integ))
+```
+
+The last step before making a choropleth map is to join the data of the base that we want to map to the base with spatial data. We do this with the tidyverse functions. There are two basic functions designed to relate data between different data frames:
+
+- Mutating joins, which add new variables to a data frame from matching observations in another table.
+
+- Filtering joins, which filter observations in a data frame based on whether or not they coincide with an observation in another table. 
+
+Let X and Y be two data frames:
+
+Function | Action
+---- | ----
+inner join | it maintains all the observations that appear in X and Y.
+left join | keep all observations in X.
+right join | keep all observations in Y.
+full join | keep all observations in X and Y.
+semi join | keep all observations in X with matches in Y.
+anti join | discards all observations in X with matches in Y.
+
+Since we have 32 observations in each data frame that we want to join, one for each State, the result will be the same when using any of the first 5 functions in the previous table. The basic syntax for using these functions is:
+
+```{r}
+# Replicate the original base to be able to use it later
+mapeo_edos <- mapa_mex_edos
+
+# Paste the data from "ENIGH_edos" to the dataframe "mapping_edos" with the inner_join function
+mapeo_edos <- inner_join(mapa_mex_edos, ENIGH_edos, 
+                   by = "CVE_ENT")
+
+# Confirm that the data has been pasted correctly
+head(mapeo_edos)
+```
+
+## Choropleth map. National level
+
+Once at this point it is easy to make the choropleth map, simply use the tm_fill function of the tmap library as shown below:
+
+```{r}
+# First map
+tm_shape(mapeo_edos) + 
+  tm_fill(col = "Ing_prom")
+```
+
+The same map with ggplot is made with the following code:
+
+```{r}
+mapeo_edos %>% 
+  ggplot(aes(fill=Ing_prom)) + 
+  geom_sf()
+```
+
+## Choropleth map. Municipal level
+
+To create a map at the municipal level, the same process is carried out but with the municipal data.
+
+```{r}
+# Backup the spatial dataset 
+mapeo_mun <- mapa_mex_mun
+
+# Create a database with ENIGH data at the municipal level
+ENIGH_muni <- ENIGH1 %>% group_by(ubica_geo) %>%
+  summarize(Ing_prom = weighted.mean(ing_cor, factor), 
+            Poblacion = sum(factor*tot_integ)) %>% 
+  mutate(CVEGEO = 0) 
+
+# We extract the identifiers of each state from the ubica_geo column and store them in the CVEGEO column
+for (j in 1:nrow(ENIGH_muni)) {
+  if( nchar(ENIGH_muni$ubica_geo[j] ) < 5){
+  ENIGH_muni$CVEGEO[j] <- paste0("0", substr(ENIGH_muni$ubica_geo[j], start = 1, stop = 5)) 
+  } else { 
+  ENIGH_muni$CVEGEO[j] <- substr(ENIGH_muni$ubica_geo[j], start = 1, stop = 5)
+  }
+}
+
+# We convert the CVE_ENT column into a factor to match that of the base mapa_mex_mun
+ENIGH_muni$CVEGEO <- as.factor(ENIGH_muni$CVEGEO)
+
+str(ENIGH_muni)
+```
+
+```{r}
+# There are only observations for 996 municipalities, 
+# so we paste the ENIGH_muni data to the mapping_mun dataframe with the left_join function
+mapeo_mun <- left_join(mapa_mex_mun, ENIGH_muni, 
+                   by = "CVEGEO")
+```
+
+To create the same map of average income but now at the municipal level:
+
+```{r}
+tm_shape(mapeo_mun) + 
+  tm_fill(col="Ing_prom")
+```
+
+Note that the municipalities in gray are the ones not registered in the 2018 ENIGH. This happens because the ENIGH is only done at the municipal level in multiples of 5 years (2000, 2005, etc.).
+
+For the available data, practically only one color is observed, this is because there is an atypical sample. To find the atypical sample and eliminate it, we first sort the data set by average income:
+
+```{r}
+# Top 10 average income municipalities
+head(ENIGH_muni %>% arrange(desc(Ing_prom)), n=10)
+```
+```{r}
+# Check municipality 19019
+mapeo_mun %>% filter(ubica_geo == 19019)
+```
+
+The municipality that causes problems is San Pedro Garza García in Nuevo León (19019), since it has an average income of more than 300 thousand pesos above the nearest municipality. We assign NA to leave it off base and do not alter the map.
+
+```{r}
+# Index the observation with the maximum average income
+which.max(ENIGH_muni$Ing_prom)
+
+# Replace that observation with NA
+ENIGH_muni$Ing_prom[518] <- NA
+
+# Rejoin the datasets
+mapeo_mun <- left_join(mapa_mex_mun, ENIGH_muni, 
+                   by = "CVEGEO")
+```
+
+```{r}
+tm_shape(mapeo_mun) + 
+  tm_fill(col="Ing_prom")
+```
+
+It improved a little bit, but it's not perfect yet, we need the full municipalities data from the more recent ENIGH with available data.
+
+To map the data for a single State, we simply create a new data frame by filtering the desired State observations. For example, in the case of Aguascaliententes with CVE_ENT = 01 it is like this:
+
+```{r}
+# Filter only obs of Aguascalientes
+mapa_ags <- mapeo_mun %>% filter(CVE_ENT == "01")
+
+# Choropleth map of Aguascalientes. 
+tm_shape(mapa_ags)+
+  tm_fill(col = "Ing_prom")+
+  tm_borders()
+```
+
+For Mexico City in ggplot:
+
+```{r}
+mapa_cdmx <- mapeo_mun %>% filter(CVE_ENT == "09")
+
+mapa_cdmx %>% 
+  ggplot(aes(fill=Ing_prom)) + 
+  geom_sf()
+```
+
+
+## Styling the maps
+
+Here are some example to add labels, notes, personalize the colors and legends.
+
+```{r}
+tm_shape(mapeo_edos) + 
+  tm_fill(col = "Ing_prom", 
+          title = "Miles de pesos",
+          palette = "Greens", 
+          labels = c("20 a 30", "30 a 40", "40 a 50", 
+                     "50 a 60", "60 a 70", "70 a 80")) + 
+  tm_borders(col = "grey60",
+             lwd = 0.5) + 
+  tm_layout(main.title = "Ingreso promedio trimestral por Estado, 2018", 
+            main.title.position = "center",
+            frame = F) +
+  tm_credits("Fuente: elaboración propia con datos de la ENIGH, INEGI.", 
+             position = c("left", "bottom"))
+```
+
+
+```{r}
+tm_shape(mapeo_mun) + 
+  tm_fill(col="Poblacion", 
+          title = "Miles de personas", 
+          palette = "viridis", 
+          labels = c("1 a 500", "500 a 1,000", 
+                     "1,000 a 1,500", "1,500 a 2,000"), 
+          textNA = "No disponible", 
+          colorNA = "red") + 
+  tm_layout(main.title = "Población por municipio implícita en la ENIGH, 2018",
+            main.title.position = "center",
+            frame = F) + 
+  tm_credits("Fuente: elaboración propia con datos de la ENIGH, INEGI.", 
+             position = c("left", "bottom"))
+```
+
+Finally, we style the map of delegations with the name of each observation (for this purpose, we used the options = "ENCODING = WINDOWS-1252" argument when loading the bases of the maps, otherwise it does not adequately recognize the accents) .
+
+```{r}
+tmap_mode("view")
+tm_shape(mapa_cdmx) +
+  tm_fill(col = "Ing_prom", 
+          title = "Miles de pesos", 
+          palette = "RdYlGn", 
+          labels = c("0 a 50", "50 a 100", "100 a 150", 
+                     "150 a 200", "200 a 250")) +
+  tm_borders() + 
+  tm_text(text = "NOMGEO",
+          col = "black", 
+          scale = 0.4, 
+          remove.overlap = F,
+          just = "top") +
+  tm_layout(main.title = "CDMX: ingreso promedio trimestral por delegación, 2018", 
+            main.title.position = "center", 
+            main.title.size = 1.2,
+            legend.outside = T, 
+            frame = F) + 
+  tm_credits("Fuente: elaboración propia con \n datos de la ENIGH, INEGI.",
+             position = c("LEFT", "BOTTOM"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
